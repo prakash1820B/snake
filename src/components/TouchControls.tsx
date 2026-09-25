@@ -13,13 +13,13 @@ export default function TouchControls({ onDirection, disabled }: TouchControlsPr
   };
 
   const btnClass = `w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center text-2xl sm:text-3xl font-bold
-    bg-slate-700/80 text-white active:bg-emerald-600 active:scale-90
+    bg-emerald-800/80 text-emerald-100 active:bg-orange-600 active:scale-90
     transition-all duration-100 select-none touch-manipulation
-    border border-slate-600/50 shadow-lg hover:bg-slate-600/80 hover:border-emerald-500/30`;
+    border border-emerald-600/50 shadow-lg hover:bg-emerald-700/80 hover:border-orange-400/30`;
 
   const disabledBtnClass = `w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center text-2xl sm:text-3xl font-bold
-    bg-slate-800/50 text-slate-600 transition-all duration-100 select-none
-    border border-slate-700/30`;
+    bg-emerald-950/50 text-emerald-800 transition-all duration-100 select-none
+    border border-emerald-900/30`;
 
   return (
     <div className="flex flex-col items-center gap-2 mt-4">
