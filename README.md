@@ -17,6 +17,7 @@
 | ⏸ **Pause & Restart** | Full game state management (idle, playing, paused, game over) |
 | 🎯 **3 Difficulty Levels** | Easy, Medium, Hard — different speeds & scoring |
 | 🏆 **High Score Tracking** | Best score persisted via `localStorage` |
+| 🔄 **Wrap-Around Edges** | Snake passes through walls and appears on the opposite side |
 | ✨ **Modern UI** | Dark theme, gradients, smooth animations, glass-morphism overlays |
 | 📐 **Fully Responsive** | Optimized for desktop and mobile screens |
 | 🚀 **Lightweight** | Fast load times, zero heavy dependencies |
@@ -27,8 +28,9 @@
 1. Press **Start Game** or **Space** to begin
 2. Guide the snake 🐍 to eat the red food 🔴
 3. The snake grows longer with each food eaten
-4. Avoid hitting the walls or your own body
-5. Try to beat your high score! 🏆
+4. The snake **wraps around edges** — go off one side, appear on the other!
+5. Avoid hitting your own body
+6. Try to beat your high score! 🏆
 
 ## 🕹 Controls
 
@@ -114,6 +116,7 @@ snake-game/
 
 ## 🧠 Implementation Highlights
 
+- **Wrap-Around Edges** — Toroidal grid where the snake passes through walls and appears on the opposite side
 - **Direction Queue** — Prevents rapid key presses from causing the snake to reverse into itself
 - **Ref-based Game Loop** — Uses refs for food/score/direction to avoid stale closures in `setInterval`
 - **Efficient Rendering** — Uses stable keys for snake segments, minimal re-renders

@@ -168,11 +168,11 @@ export function useSnakeGame() {
           case 'RIGHT': head.x += 1; break;
         }
 
-        // Wall collision
-        if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE) {
-          endGame();
-          return prevSnake;
-        }
+        // Wrap around edges (toroidal grid)
+        if (head.x < 0) head.x = GRID_SIZE - 1;
+        else if (head.x >= GRID_SIZE) head.x = 0;
+        if (head.y < 0) head.y = GRID_SIZE - 1;
+        else if (head.y >= GRID_SIZE) head.y = 0;
 
         // Self collision (check against body, excluding tail since it will move)
         const bodyToCheck = prevSnake.slice(0, -1);
