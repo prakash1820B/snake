@@ -2,13 +2,24 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 
 export type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 export type Position = { x: number; y: number };
+export type Difficulty = 'easy' | 'medium' | 'hard';
 export type GameState = 'idle' | 'playing' | 'paused' | 'gameover';
 
 const GRID_SIZE = 20;
 const CENTER = GRID_SIZE / 2;
 const RADIUS = GRID_SIZE / 2;
-const SPEED = 120;
-const POINTS = 10;
+
+const SPEED_MAP: Record<Difficulty, number> = {
+  easy: 180,
+  medium: 120,
+  hard: 70,
+};
+
+const POINTS_MAP: Record<Difficulty, number> = {
+  easy: 5,
+  medium: 10,
+  hard: 20,
+};
 
 function isInCircle(pos: Position): boolean {
   const dx = pos.x - CENTER + 0.5;
@@ -80,6 +91,7 @@ export function useGame() {
   const [carrots, setCarrots] = useState<Position[]>(() => generateCarrots(INITIAL_RABBIT, 3));
   const [gameState, setGameState] = useState<GameState>('idle');
   const [score, setScore] = useState(0);
+  const [difficulty, setDifficulty] = useState<Difficulty>('medium');
   const [highScore, setHighScore] = useState<number>(() => {
     try {
       const saved = localStorage.getItem('rabbit-high-score');
@@ -92,11 +104,13 @@ export function useGame() {
   const directionRef = useRef<Direction>('RIGHT');
   const carrotsRef = useRef<Position[]>(carrots);
   const scoreRef = useRef(0);
+  const difficultyRef = useRef<Difficulty>('medium');
   const gameStateRef = useRef<GameState>('idle');
   const directionQueueRef = useRef<Direction[]>([]);
 
   useEffect(() => { carrotsRef.current = carrots; }, [carrots]);
   useEffect(() => { scoreRef.current = score; }, [score]);
+  useEffect(() => { difficultyRef.current = difficulty; }, [difficulty]);
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
 
   const saveHighScore = useCallback((finalScore: number) => {
@@ -234,8 +248,9 @@ export function useGame() {
           setCarrots(newCarrots);
           carrotsRef.current = newCarrots;
 
+          const points = POINTS_MAP[difficultyRef.current];
           setScore(prev => {
-            const newScore = prev + POINTS;
+            const newScore = prev + points;
             scoreRef.current = newScore;
             return newScore;
           });
@@ -248,15 +263,16 @@ export function useGame() {
       });
     };
 
-    const interval = setInterval(tick, SPEED);
+    const interval = setInterval(tick, SPEED_MAP[difficulty]);
     return () => clearInterval(interval);
-  }, [gameState, endGame]);
+  }, [gameState, difficulty, endGame]);
 
   return {
     rabbit,
     carrots,
     gameState,
     score,
+    difficulty,
     highScore,
     gridSize: GRID_SIZE,
     startGame,
@@ -264,5 +280,6 @@ export function useGame() {
     togglePause,
     changeDirection,
     setDirectionFromTarget,
+    setDifficulty,
   };
 }
