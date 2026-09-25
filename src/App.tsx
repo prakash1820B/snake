@@ -20,18 +20,20 @@ export default function App() {
   } = useSnakeGame();
 
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const boardRef = useRef<HTMLDivElement>(null);
 
   // Keyboard controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      const key = e.key.toLowerCase();
+      const key = e.key;
+      const keyLower = key.toLowerCase();
 
-      // Prevent scrolling with arrow keys
-      if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(e.key)) {
+      // Prevent default for game keys
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(key)) {
         e.preventDefault();
       }
 
-      switch (key) {
+      switch (keyLower) {
         case 'arrowup':
         case 'w':
           changeDirection('UP');
@@ -56,7 +58,9 @@ export default function App() {
           }
           break;
         case 'p':
-          togglePause();
+          if (gameState === 'playing' || gameState === 'paused') {
+            togglePause();
+          }
           break;
         case 'r':
           resetGame();
@@ -68,7 +72,7 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [gameState, changeDirection, startGame, togglePause, resetGame]);
 
-  // Touch/swipe controls
+  // Swipe controls on game board only
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     const touch = e.touches[0];
     touchStartRef.current = { x: touch.clientX, y: touch.clientY };
@@ -79,69 +83,77 @@ export default function App() {
     const touch = e.changedTouches[0];
     const dx = touch.clientX - touchStartRef.current.x;
     const dy = touch.clientY - touchStartRef.current.y;
-    const minSwipe = 30;
+    const minSwipe = 20;
 
-    if (Math.abs(dx) < minSwipe && Math.abs(dy) < minSwipe) return;
+    if (Math.abs(dx) < minSwipe && Math.abs(dy) < minSwipe) {
+      touchStartRef.current = null;
+      return;
+    }
 
-    if (Math.abs(dx) > Math.abs(dy)) {
-      changeDirection(dx > 0 ? 'RIGHT' : 'LEFT');
-    } else {
-      changeDirection(dy > 0 ? 'DOWN' : 'UP');
+    if (gameState === 'playing') {
+      if (Math.abs(dx) > Math.abs(dy)) {
+        changeDirection(dx > 0 ? 'RIGHT' : 'LEFT');
+      } else {
+        changeDirection(dy > 0 ? 'DOWN' : 'UP');
+      }
     }
     touchStartRef.current = null;
-  }, [changeDirection]);
+  }, [changeDirection, gameState]);
 
-  const difficulties: { value: Difficulty; label: string; color: string }[] = [
-    { value: 'easy', label: 'Easy', color: 'bg-green-500' },
-    { value: 'medium', label: 'Medium', color: 'bg-yellow-500' },
-    { value: 'hard', label: 'Hard', color: 'bg-red-500' },
+  const difficulties: { value: Difficulty; label: string; color: string; emoji: string }[] = [
+    { value: 'easy', label: 'Easy', color: 'bg-green-500', emoji: '🟢' },
+    { value: 'medium', label: 'Medium', color: 'bg-yellow-500', emoji: '🟡' },
+    { value: 'hard', label: 'Hard', color: 'bg-red-500', emoji: '🔴' },
   ];
 
   return (
-    <div
-      className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white flex flex-col items-center justify-center p-4 select-none"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-    >
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white flex flex-col items-center p-4 py-6 select-none overflow-x-hidden">
       {/* Header */}
-      <div className="text-center mb-4">
+      <div className="text-center mb-3">
         <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
           🐍 Snake Game
         </h1>
-        <p className="text-slate-400 text-sm mt-1">Classic arcade fun, modern style</p>
+        <p className="text-slate-400 text-xs md:text-sm mt-1">Classic arcade fun, modern style</p>
       </div>
 
       {/* Score Panel */}
-      <div className="flex items-center gap-6 mb-4">
+      <div className="flex items-center gap-6 mb-3 bg-slate-800/50 rounded-xl px-6 py-3 border border-slate-700/50">
         <div className="text-center">
-          <p className="text-xs text-slate-400 uppercase tracking-wide">Score</p>
-          <p className="text-2xl font-bold text-emerald-400 tabular-nums">{score}</p>
+          <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Score</p>
+          <p className="text-2xl md:text-3xl font-bold text-emerald-400 tabular-nums leading-tight">{score}</p>
         </div>
         <div className="w-px h-10 bg-slate-700" />
         <div className="text-center">
-          <p className="text-xs text-slate-400 uppercase tracking-wide">Best</p>
-          <p className="text-2xl font-bold text-yellow-400 tabular-nums">{highScore}</p>
+          <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Best</p>
+          <p className="text-2xl md:text-3xl font-bold text-yellow-400 tabular-nums leading-tight">{highScore}</p>
         </div>
       </div>
 
       {/* Game Board */}
-      <GameBoard
-        snake={snake}
-        food={food}
-        gridSize={gridSize}
-        gameState={gameState}
-      />
+      <div
+        ref={boardRef}
+        className="w-full max-w-[500px]"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        <GameBoard
+          snake={snake}
+          food={food}
+          gridSize={gridSize}
+          gameState={gameState}
+          score={score}
+        />
+      </div>
 
-      {/* Controls */}
-      <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
-        {/* Start/Pause Button */}
+      {/* Action Buttons */}
+      <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
         {(gameState === 'idle' || gameState === 'gameover') && (
           <button
             onClick={startGame}
             className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold
               transition-all duration-200 active:scale-95 shadow-lg shadow-emerald-600/30"
           >
-            {gameState === 'gameover' ? '🔄 Restart' : '▶ Start'}
+            {gameState === 'gameover' ? '🔄 Play Again' : '▶ Start Game'}
           </button>
         )}
 
@@ -156,17 +168,25 @@ export default function App() {
         )}
 
         {gameState === 'paused' && (
-          <button
-            onClick={togglePause}
-            className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold
-              transition-all duration-200 active:scale-95 shadow-lg shadow-emerald-600/30"
-          >
-            ▶ Resume
-          </button>
+          <>
+            <button
+              onClick={togglePause}
+              className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold
+                transition-all duration-200 active:scale-95 shadow-lg shadow-emerald-600/30"
+            >
+              ▶ Resume
+            </button>
+            <button
+              onClick={resetGame}
+              className="px-5 py-2.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-semibold
+                transition-all duration-200 active:scale-95 border border-slate-600"
+            >
+              🔄 Reset
+            </button>
+          </>
         )}
 
-        {/* Restart Button */}
-        {gameState !== 'idle' && (
+        {(gameState === 'playing' || gameState === 'gameover') && (
           <button
             onClick={resetGame}
             className="px-5 py-2.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-semibold
@@ -179,14 +199,18 @@ export default function App() {
 
       {/* Difficulty Selector */}
       <div className="flex items-center gap-2 mt-4">
-        <span className="text-xs text-slate-400 uppercase tracking-wide mr-1">Difficulty:</span>
+        <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold mr-1">
+          Difficulty:
+        </span>
         {difficulties.map(d => (
           <button
             key={d.value}
             onClick={() => {
-              setDifficulty(d.value);
-              if (gameState === 'playing' || gameState === 'paused') {
-                resetGame();
+              if (difficulty !== d.value) {
+                setDifficulty(d.value);
+                if (gameState === 'playing' || gameState === 'paused') {
+                  resetGame();
+                }
               }
             }}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200
@@ -196,33 +220,40 @@ export default function App() {
                   : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700 border border-slate-600/50'
               }`}
           >
-            {d.label}
+            {d.emoji} {d.label}
           </button>
         ))}
       </div>
 
-      {/* Touch Controls (Mobile) */}
+      {/* Touch Controls (Mobile only) */}
       <TouchControls
         onDirection={changeDirection}
         disabled={gameState !== 'playing'}
       />
 
-      {/* Keyboard hints (Desktop) */}
-      <div className="hidden md:flex items-center gap-4 mt-4 text-xs text-slate-500">
-        <span>
-          <kbd className="px-1.5 py-0.5 rounded bg-slate-700 text-slate-300 text-xs">↑↓←→</kbd> Move
+      {/* Keyboard hints (Desktop only) */}
+      <div className="hidden md:flex flex-wrap items-center justify-center gap-3 mt-4 text-xs text-slate-500">
+        <span className="flex items-center gap-1">
+          <kbd className="px-1.5 py-0.5 rounded bg-slate-700/80 text-slate-300 text-[10px] font-mono border border-slate-600">↑↓←→</kbd>
+          <span>Move</span>
         </span>
-        <span>
-          <kbd className="px-1.5 py-0.5 rounded bg-slate-700 text-slate-300 text-xs">Space</kbd> Start/Pause
+        <span className="flex items-center gap-1">
+          <kbd className="px-1.5 py-0.5 rounded bg-slate-700/80 text-slate-300 text-[10px] font-mono border border-slate-600">Space</kbd>
+          <span>Start / Pause</span>
         </span>
-        <span>
-          <kbd className="px-1.5 py-0.5 rounded bg-slate-700 text-slate-300 text-xs">R</kbd> Reset
+        <span className="flex items-center gap-1">
+          <kbd className="px-1.5 py-0.5 rounded bg-slate-700/80 text-slate-300 text-[10px] font-mono border border-slate-600">P</kbd>
+          <span>Pause</span>
+        </span>
+        <span className="flex items-center gap-1">
+          <kbd className="px-1.5 py-0.5 rounded bg-slate-700/80 text-slate-300 text-[10px] font-mono border border-slate-600">R</kbd>
+          <span>Reset</span>
         </span>
       </div>
 
       {/* Footer */}
-      <p className="text-slate-600 text-xs mt-6">
-        Swipe on mobile or use arrow keys on desktop
+      <p className="text-slate-600 text-[10px] mt-4 text-center">
+        Swipe on the game board or use arrow keys • Built with React + TypeScript
       </p>
     </div>
   );

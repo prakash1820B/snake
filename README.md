@@ -1,29 +1,36 @@
 # 🐍 Snake Game
 
-A modern, responsive Snake web game built with **React**, **TypeScript**, **Vite**, and **Tailwind CSS**. Enjoy classic arcade fun with a sleek dark theme, smooth animations, and full mobile support.
+> A modern, responsive Snake web game built with **React**, **TypeScript**, **Vite**, and **Tailwind CSS**.
 
-![Snake Game](https://img.shields.io/badge/React-18-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue) ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-blue) ![License](https://img.shields.io/badge/license-MIT-green)
+[![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=white)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
+[![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
 ## ✨ Features
 
-- 🎮 **Keyboard Controls** — Arrow keys or WASD to move, Space to start/pause, R to reset
-- 📱 **Touch Controls** — Swipe gestures + on-screen D-pad for mobile devices
-- ⏸ **Pause & Restart** — Full game state management (idle, playing, paused, game over)
-- 🎯 **3 Difficulty Levels** — Easy, Medium, Hard (different speeds & scoring)
-- 🏆 **High Score Tracking** — Best score persisted via `localStorage`
-- ✨ **Modern UI** — Dark theme, gradients, smooth CSS animations
-- 📐 **Fully Responsive** — Optimized for desktop and mobile screens
-- 🚀 **Lightweight** — Fast load times, no heavy dependencies
+| Feature | Description |
+|---------|-------------|
+| 🎮 **Keyboard Controls** | Arrow keys or WASD to move, Space to start/pause, R to reset |
+| 📱 **Touch Controls** | Swipe gestures on game board + on-screen D-pad for mobile |
+| ⏸ **Pause & Restart** | Full game state management (idle, playing, paused, game over) |
+| 🎯 **3 Difficulty Levels** | Easy, Medium, Hard — different speeds & scoring |
+| 🏆 **High Score Tracking** | Best score persisted via `localStorage` |
+| ✨ **Modern UI** | Dark theme, gradients, smooth animations, glass-morphism overlays |
+| 📐 **Fully Responsive** | Optimized for desktop and mobile screens |
+| 🚀 **Lightweight** | Fast load times, zero heavy dependencies |
+| 🛡 **Type-Safe** | Built entirely with TypeScript |
 
-## 🎯 How to Play
+## 🎮 How to Play
 
-1. Press **Start** or **Space** to begin
-2. Guide the snake to eat the red food
+1. Press **Start Game** or **Space** to begin
+2. Guide the snake 🐍 to eat the red food 🔴
 3. The snake grows longer with each food eaten
-4. Avoid hitting the walls or yourself
-5. Try to beat your high score!
+4. Avoid hitting the walls or your own body
+5. Try to beat your high score! 🏆
 
-## 🎮 Controls
+## 🕹 Controls
 
 ### Desktop (Keyboard)
 
@@ -42,25 +49,25 @@ A modern, responsive Snake web game built with **React**, **TypeScript**, **Vite
 
 ## 🎚 Difficulty Levels
 
-| Level | Speed | Points per Food |
-|-------|-------|-----------------|
-| 🟢 Easy | Slow | 5 |
-| 🟡 Medium | Normal | 10 |
-| 🔴 Hard | Fast | 20 |
+| Level | Emoji | Speed | Points per Food |
+|-------|-------|-------|-----------------|
+| Easy | 🟢 | Slow (180ms) | 5 |
+| Medium | 🟡 | Normal (120ms) | 10 |
+| Hard | 🔴 | Fast (70ms) | 20 |
 
 ## 🛠 Tech Stack
 
-- **React 18** — UI framework
-- **TypeScript** — Type safety
-- **Vite** — Build tool
-- **Tailwind CSS 4** — Styling
-- **Custom Hooks** — Game logic separation
+- **React 18** — UI framework with hooks
+- **TypeScript** — Type safety throughout
+- **Vite** — Lightning-fast build tool
+- **Tailwind CSS 4** — Utility-first styling
+- **Custom Hooks** — Clean game logic separation
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ installed
+- [Node.js](https://nodejs.org/) 18+ installed
 - npm or yarn
 
 ### Installation
@@ -73,7 +80,7 @@ cd snake-game
 # Install dependencies
 npm install
 
-# Start development server
+# Start development server (http://localhost:3000)
 npm run dev
 
 # Build for production
@@ -87,44 +94,53 @@ npm run preview
 
 ```
 snake-game/
+├── public/                     # Static assets
 ├── src/
 │   ├── components/
-│   │   ├── GameBoard.tsx      # Game board rendering
-│   │   └── TouchControls.tsx  # Mobile D-pad controls
+│   │   ├── GameBoard.tsx       # Game board rendering (snake, food, overlays)
+│   │   └── TouchControls.tsx   # Mobile D-pad controls
 │   ├── hooks/
-│   │   └── useSnakeGame.ts    # Core game logic hook
-│   ├── App.tsx                # Main app component
-│   ├── main.tsx               # Entry point
-│   └── index.css              # Global styles
-├── index.html                 # HTML template
-├── vite.config.js             # Vite configuration
-├── tsconfig.json              # TypeScript config
-└── package.json               # Dependencies & scripts
+│   │   └── useSnakeGame.ts     # Core game logic (state, loop, collisions)
+│   ├── App.tsx                 # Main app component (layout, controls)
+│   ├── main.tsx                # React entry point
+│   └── index.css               # Global styles + Tailwind
+├── index.html                  # HTML template
+├── vite.config.js              # Vite configuration
+├── tsconfig.json               # TypeScript configuration
+├── package.json                # Dependencies & scripts
+├── LICENSE                     # MIT License
+└── README.md                   # This file
 ```
 
-## 📸 Screenshots
+## 🧠 Implementation Highlights
 
-_Add screenshots of your game here!_
+- **Direction Queue** — Prevents rapid key presses from causing the snake to reverse into itself
+- **Ref-based Game Loop** — Uses refs for food/score/direction to avoid stale closures in `setInterval`
+- **Efficient Rendering** — Uses stable keys for snake segments, minimal re-renders
+- **Self-collision Optimization** — Excludes tail from collision check (since it moves away)
+- **localStorage Persistence** — High score survives page refreshes
 
 ## 🤝 Contributing
 
-Contributions are welcome! Feel free to:
+Contributions, issues, and feature requests are welcome!
 
 1. Fork the project
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
-- Inspired by the classic Snake arcade game
-- Built with modern web technologies for a smooth experience
+- Inspired by the classic 1976 Snake arcade game
+- Built with modern web technologies for a smooth, responsive experience
 
 ---
 
-Made with ❤️ and React
+<div align="center">
+  Made with ❤️ using React + TypeScript + Tailwind CSS
+</div>
