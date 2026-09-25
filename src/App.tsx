@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { useGame, Direction, Difficulty } from './hooks/useGame';
+import { useDeviceOrientation } from './hooks/useDeviceOrientation';
 import GameBoard from './components/GameBoard';
 import TouchControls from './components/TouchControls';
 
@@ -19,6 +20,13 @@ export default function App() {
     setDirectionFromTarget,
     setDifficulty,
   } = useGame();
+
+  const {
+    motionEnabled,
+    motionSupported,
+    currentTilt,
+    toggleMotion,
+  } = useDeviceOrientation(changeDirection);
 
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
@@ -269,6 +277,32 @@ export default function App() {
         ))}
       </div>
 
+      {/* Motion Controls (Mobile only) */}
+      {motionSupported && (
+        <div className="mt-4 flex flex-col items-center gap-2">
+          <button
+            onClick={toggleMotion}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2
+              ${
+                motionEnabled
+                  ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/30'
+                  : 'bg-emerald-900/50 text-emerald-200 hover:bg-emerald-800/60 border border-emerald-700/50'
+              }`}
+          >
+            <span className="text-lg">{motionEnabled ? '📱' : '📲'}</span>
+            <span>{motionEnabled ? 'Motion Control: ON' : 'Enable Tilt Control'}</span>
+          </button>
+          {motionEnabled && (
+            <div className="text-[10px] text-emerald-400/60 text-center">
+              Tilt your phone to guide the rabbit
+              <div className="mt-1 font-mono">
+                β: {currentTilt.beta.toFixed(0)}° γ: {currentTilt.gamma.toFixed(0)}°
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Touch Controls (All devices) */}
       <TouchControls
         onDirection={changeDirection}
@@ -279,25 +313,25 @@ export default function App() {
       <div className="flex flex-wrap items-center justify-center gap-3 mt-4 text-xs text-emerald-400/60">
         <span className="flex items-center gap-1">
           <span className="px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-200 text-[10px] font-mono border border-emerald-700/50">🖱️ Mouse</span>
-          <span>Move rabbit</span>
+          <span>or</span>
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-200 text-[10px] font-mono border border-emerald-700/50">📱 Tilt</span>
+          <span>or</span>
         </span>
         <span className="hidden md:flex items-center gap-1">
           <kbd className="px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-200 text-[10px] font-mono border border-emerald-700/50">↑↓←→</kbd>
-          <span>or keys</span>
+          <span>keys</span>
         </span>
         <span className="flex items-center gap-1">
           <kbd className="px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-200 text-[10px] font-mono border border-emerald-700/50">Space</kbd>
           <span>Start/Pause</span>
         </span>
-        <span className="hidden md:flex items-center gap-1">
-          <kbd className="px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-200 text-[10px] font-mono border border-emerald-700/50">F</kbd>
-          <span>Fullscreen</span>
-        </span>
       </div>
 
       {/* Footer */}
       <p className="text-emerald-700/60 text-[10px] mt-4 text-center">
-        Hover mouse over the circle to guide the rabbit • 🐰 loves 🥕
+        Move mouse, tilt phone, or use buttons to guide the rabbit • 🐰 loves 🥕
       </p>
     </div>
   );

@@ -15,6 +15,7 @@
 | 🐰 **Cute Rabbit** | Adorable rabbit character with ears, eyes, and fluffy body |
 | 🥕 **Tasty Carrots** | Collect delicious carrots to grow your rabbit's tail |
 | 🖱️ **Mouse Control** | Move mouse over the circular board to guide the rabbit |
+| 📱 **Tilt Control** | Tilt your phone to guide the rabbit - intuitive mobile control! |
 | 🔄 **Circular Wrap** | Rabbit wraps through the circle boundary - exits one side, appears on opposite! |
 | 🎮 **Keyboard Controls** | Arrow keys or WASD to move, Space to start/pause, R to reset, F for fullscreen |
 | 📱 **Touch Controls** | Swipe gestures on game board + on-screen D-pad for all devices |
@@ -43,11 +44,27 @@
 
 ## 🕹 Controls
 
-### Mouse Control (Primary)
+### Mouse Control (Desktop)
 
 - **Move mouse** over the circular game board to guide the rabbit
 - The rabbit follows your cursor - just hover in the direction you want to go!
-- Works on both desktop and touch devices (touch and drag)
+
+### Tilt Control (Mobile)
+
+- **Tilt your phone** to guide the rabbit
+- Tilt forward → rabbit moves up
+- Tilt backward → rabbit moves down
+- Tilt left → rabbit moves left
+- Tilt right → rabbit moves right
+- Click "Enable Tilt Control" button to activate
+- Works on iOS and Android (permission required on iOS)
+
+### Touch Controls (Mobile)
+
+- **Touch and drag** on the game board to guide the rabbit
+- The rabbit follows your finger movement
+- **On-screen D-pad** buttons below the game board
+- Tap buttons to Start, Pause, or Reset
 
 ### Keyboard (Fallback)
 
@@ -58,13 +75,6 @@
 | `P` | Pause / Resume |
 | `R` | Reset game |
 | `F` | Toggle fullscreen |
-
-### Touch (Mobile)
-
-- **Touch and drag** on the game board to guide the rabbit
-- The rabbit follows your finger movement
-- **On-screen D-pad** buttons below the game board
-- Tap buttons to Start, Pause, or Reset
 
 ## 🎚 Difficulty Levels
 
@@ -135,6 +145,8 @@ rabbit-game/
 
 - **Circular Wrap-Around** — When rabbit exits the circle, it reappears on the opposite side using reflection math
 - **Mouse Control** — Rabbit follows mouse cursor position using coordinate mapping and direction calculation
+- **Tilt Control** — Device orientation API maps phone tilt (beta/gamma) to direction changes with threshold and debounce
+- **iOS Permission Handling** — Properly requests DeviceOrientation permission on iOS 13+ devices
 - **Multiple Carrots** — Random 1-5 carrots spawn at game start, new carrot spawns when one is eaten
 - **Direction Queue** — Prevents rapid inputs from causing the rabbit to reverse into itself
 - **Ref-based Game Loop** — Uses refs for carrots/score/direction to avoid stale closures in `setInterval`
@@ -178,5 +190,5 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 <div align="center">
   Made with ❤️ using React + TypeScript + Tailwind CSS
   
-  🐰 loves 🥕
+  🐰 loves 🥕 • 📱 Tilt to play!
 </div>
