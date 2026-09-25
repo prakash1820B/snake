@@ -2,26 +2,14 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 
 export type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 export type Position = { x: number; y: number };
-export type Difficulty = 'easy' | 'medium' | 'hard';
 export type GameState = 'idle' | 'playing' | 'paused' | 'gameover';
 
 const GRID_SIZE = 20;
 const CENTER = GRID_SIZE / 2;
 const RADIUS = GRID_SIZE / 2;
+const SPEED = 120;
+const POINTS = 10;
 
-const SPEED_MAP: Record<Difficulty, number> = {
-  easy: 180,
-  medium: 120,
-  hard: 70,
-};
-
-const POINTS_MAP: Record<Difficulty, number> = {
-  easy: 5,
-  medium: 10,
-  hard: 20,
-};
-
-// Check if position is within circular boundary
 function isInCircle(pos: Position): boolean {
   const dx = pos.x - CENTER + 0.5;
   const dy = pos.y - CENTER + 0.5;
@@ -29,15 +17,12 @@ function isInCircle(pos: Position): boolean {
   return distance <= RADIUS;
 }
 
-// Wrap position through circle center (toroidal reflection)
 function wrapThroughCircle(pos: Position): Position {
-  // Reflect through center
   const reflected = {
     x: 2 * (CENTER - 0.5) - pos.x,
     y: 2 * (CENTER - 0.5) - pos.y,
   };
 
-  // If still outside, clamp to nearest valid position
   if (!isInCircle(reflected)) {
     const dx = reflected.x - CENTER + 0.5;
     const dy = reflected.y - CENTER + 0.5;
@@ -54,7 +39,6 @@ function wrapThroughCircle(pos: Position): Position {
   return reflected;
 }
 
-// Get random position within circle
 function getRandomPositionInCircle(exclude: Position[]): Position {
   let pos: Position;
   let attempts = 0;
@@ -69,7 +53,6 @@ function getRandomPositionInCircle(exclude: Position[]): Position {
   return pos;
 }
 
-// Generate multiple carrots (1-5 random)
 function generateCarrots(rabbit: Position[], count: number): Position[] {
   const carrots: Position[] = [];
   for (let i = 0; i < count; i++) {
@@ -97,7 +80,6 @@ export function useGame() {
   const [carrots, setCarrots] = useState<Position[]>(() => generateCarrots(INITIAL_RABBIT, 3));
   const [gameState, setGameState] = useState<GameState>('idle');
   const [score, setScore] = useState(0);
-  const [difficulty, setDifficulty] = useState<Difficulty>('medium');
   const [highScore, setHighScore] = useState<number>(() => {
     try {
       const saved = localStorage.getItem('rabbit-high-score');
@@ -107,20 +89,14 @@ export function useGame() {
     }
   });
 
-  // Refs to avoid stale closures in game loop
   const directionRef = useRef<Direction>('RIGHT');
-  const nextDirectionRef = useRef<Direction>('RIGHT');
   const carrotsRef = useRef<Position[]>(carrots);
   const scoreRef = useRef(0);
-  const difficultyRef = useRef<Difficulty>('medium');
   const gameStateRef = useRef<GameState>('idle');
   const directionQueueRef = useRef<Direction[]>([]);
-  const carrotCountRef = useRef(3);
 
-  // Keep refs in sync with state
   useEffect(() => { carrotsRef.current = carrots; }, [carrots]);
   useEffect(() => { scoreRef.current = score; }, [score]);
-  useEffect(() => { difficultyRef.current = difficulty; }, [difficulty]);
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
 
   const saveHighScore = useCallback((finalScore: number) => {
@@ -142,12 +118,10 @@ export function useGame() {
     const initialRabbit = [...INITIAL_RABBIT];
     setRabbit(initialRabbit);
     const count = Math.floor(Math.random() * 5) + 1;
-    carrotCountRef.current = count;
     const newCarrots = generateCarrots(initialRabbit, count);
     setCarrots(newCarrots);
     carrotsRef.current = newCarrots;
     directionRef.current = 'RIGHT';
-    nextDirectionRef.current = 'RIGHT';
     directionQueueRef.current = [];
     setScore(0);
     scoreRef.current = 0;
@@ -159,12 +133,10 @@ export function useGame() {
       const initialRabbit = [...INITIAL_RABBIT];
       setRabbit(initialRabbit);
       const count = Math.floor(Math.random() * 5) + 1;
-      carrotCountRef.current = count;
       const newCarrots = generateCarrots(initialRabbit, count);
       setCarrots(newCarrots);
       carrotsRef.current = newCarrots;
       directionRef.current = 'RIGHT';
-      nextDirectionRef.current = 'RIGHT';
       directionQueueRef.current = [];
       setScore(0);
       scoreRef.current = 0;
@@ -193,18 +165,12 @@ export function useGame() {
     }
   }, []);
 
-  // Set direction based on target position (for mouse control)
   const setDirectionFromTarget = useCallback((targetX: number, targetY: number) => {
     if (gameStateRef.current !== 'playing') return;
 
-    const head = directionRef.current;
-    const rabbitHead = { x: 0, y: 0 }; // Will be updated in game loop
-
-    // Calculate direction based on mouse position relative to center
     const dx = targetX - CENTER;
     const dy = targetY - CENTER;
 
-    // Determine primary direction
     let newDir: Direction;
     if (Math.abs(dx) > Math.abs(dy)) {
       newDir = dx > 0 ? 'RIGHT' : 'LEFT';
@@ -212,7 +178,6 @@ export function useGame() {
       newDir = dy > 0 ? 'DOWN' : 'UP';
     }
 
-    // Only change if not opposite
     const lastQueued = directionQueueRef.current.length > 0
       ? directionQueueRef.current[directionQueueRef.current.length - 1]
       : directionRef.current;
@@ -222,7 +187,6 @@ export function useGame() {
     }
   }, []);
 
-  // Game loop
   useEffect(() => {
     if (gameState !== 'playing') return;
 
@@ -245,14 +209,12 @@ export function useGame() {
           case 'RIGHT': head.x += 1; break;
         }
 
-        // Wrap through circle if outside boundary
         if (!isInCircle(head)) {
           const wrapped = wrapThroughCircle(head);
           head.x = wrapped.x;
           head.y = wrapped.y;
         }
 
-        // Self collision
         const bodyToCheck = prevRabbit.slice(0, -1);
         if (bodyToCheck.some(s => s.x === head.x && s.y === head.y)) {
           endGame();
@@ -262,7 +224,6 @@ export function useGame() {
         const newRabbit = [head, ...prevRabbit];
         const currentCarrots = carrotsRef.current;
 
-        // Check if rabbit ate a carrot
         const eatenIndex = currentCarrots.findIndex(c => c.x === head.x && c.y === head.y);
 
         if (eatenIndex !== -1) {
@@ -273,9 +234,8 @@ export function useGame() {
           setCarrots(newCarrots);
           carrotsRef.current = newCarrots;
 
-          const points = POINTS_MAP[difficultyRef.current];
           setScore(prev => {
-            const newScore = prev + points;
+            const newScore = prev + POINTS;
             scoreRef.current = newScore;
             return newScore;
           });
@@ -288,16 +248,15 @@ export function useGame() {
       });
     };
 
-    const interval = setInterval(tick, SPEED_MAP[difficulty]);
+    const interval = setInterval(tick, SPEED);
     return () => clearInterval(interval);
-  }, [gameState, difficulty, endGame]);
+  }, [gameState, endGame]);
 
   return {
     rabbit,
     carrots,
     gameState,
     score,
-    difficulty,
     highScore,
     gridSize: GRID_SIZE,
     startGame,
@@ -305,6 +264,5 @@ export function useGame() {
     togglePause,
     changeDirection,
     setDirectionFromTarget,
-    setDifficulty,
   };
 }

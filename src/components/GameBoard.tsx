@@ -10,19 +10,31 @@ interface GameBoardProps {
 
 export default function GameBoard({ rabbit, carrots, gridSize, gameState, score }: GameBoardProps) {
   const cellSize = 100 / gridSize;
+  // Top-down perspective: taller cells to create depth illusion
+  const heightStretch = 1.35;
 
   return (
-    <div className="relative w-full aspect-square max-w-[500px] mx-auto">
-      {/* Circular game board */}
+    <div
+      className="relative w-full max-w-[500px] mx-auto"
+      style={{
+        aspectRatio: `1 / ${heightStretch}`,
+        perspective: '800px',
+      }}
+    >
+      {/* Circular game board with perspective tilt */}
       <div
-        className="absolute inset-0 rounded-full border-4 border-emerald-700/60 overflow-hidden"
+        className="absolute inset-0 overflow-hidden"
         style={{
-          background: 'radial-gradient(circle at center, #1a3a2e 0%, #0f2818 70%, #0a1f12 100%)',
-          boxShadow: '0 0 30px rgba(16, 185, 129, 0.2), inset 0 0 60px rgba(0, 0, 0, 0.3)',
+          borderRadius: '50% / 37%',
+          border: '4px solid #1a1a1a',
+          background: 'radial-gradient(ellipse at 50% 40%, #1a2e1a 0%, #0a1a0a 60%, #050d05 100%)',
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(16, 185, 129, 0.15), inset 0 -30px 60px rgba(0,0,0,0.5)',
+          transform: 'rotateX(25deg)',
+          transformStyle: 'preserve-3d',
         }}
       >
-        {/* Circular grid pattern */}
-        <svg className="absolute inset-0 w-full h-full opacity-[0.06]" aria-hidden="true">
+        {/* Black grid lines */}
+        <svg className="absolute inset-0 w-full h-full" aria-hidden="true">
           {Array.from({ length: gridSize - 1 }).map((_, i) => (
             <g key={i}>
               <line
@@ -30,26 +42,28 @@ export default function GameBoard({ rabbit, carrots, gridSize, gameState, score 
                 y1="0"
                 x2={`${((i + 1) / gridSize) * 100}%`}
                 y2="100%"
-                stroke="#86efac"
-                strokeWidth="0.5"
+                stroke="#000000"
+                strokeWidth="0.8"
+                opacity="0.4"
               />
               <line
                 x1="0"
                 y1={`${((i + 1) / gridSize) * 100}%`}
                 x2="100%"
                 y2={`${((i + 1) / gridSize) * 100}%`}
-                stroke="#86efac"
-                strokeWidth="0.5"
+                stroke="#000000"
+                strokeWidth="0.8"
+                opacity="0.4"
               />
             </g>
           ))}
         </svg>
 
-        {/* Circular boundary indicator */}
+        {/* Ground shadow/depth gradient */}
         <div
-          className="absolute inset-[2%] rounded-full border-2 border-emerald-600/20"
+          className="absolute inset-0 pointer-events-none"
           style={{
-            boxShadow: 'inset 0 0 20px rgba(16, 185, 129, 0.1)',
+            background: 'radial-gradient(ellipse at 50% 30%, transparent 30%, rgba(0,0,0,0.4) 100%)',
           }}
         />
 
@@ -62,25 +76,40 @@ export default function GameBoard({ rabbit, carrots, gridSize, gameState, score 
               left: `${carrot.x * cellSize}%`,
               top: `${carrot.y * cellSize}%`,
               width: `${cellSize}%`,
-              height: `${cellSize}%`,
+              height: `${cellSize * heightStretch}%`,
               animationDelay: `${index * 0.2}s`,
+              zIndex: 5,
             }}
           >
             <div className="relative w-full h-full flex items-center justify-center">
-              {/* Carrot leaves on top */}
+              {/* Carrot shadow */}
               <div
                 className="absolute"
                 style={{
-                  top: '8%',
+                  bottom: '10%',
                   left: '50%',
                   transform: 'translateX(-50%)',
-                  width: '40%',
-                  height: '30%',
+                  width: '60%',
+                  height: '15%',
+                  background: 'rgba(0,0,0,0.4)',
+                  borderRadius: '50%',
+                  filter: 'blur(2px)',
+                }}
+              />
+              {/* Carrot leaves */}
+              <div
+                className="absolute"
+                style={{
+                  top: '5%',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '45%',
+                  height: '35%',
                 }}
               >
-                <div className="absolute left-1/2 bottom-0 w-[3px] h-full bg-green-500 -translate-x-1/2 rounded-full" />
-                <div className="absolute left-1/3 bottom-0 w-[3px] h-[80%] bg-green-400 -translate-x-1/2 rounded-full rotate-[-20deg]" />
-                <div className="absolute left-2/3 bottom-0 w-[3px] h-[80%] bg-green-400 -translate-x-1/2 rounded-full rotate-[20deg]" />
+                <div className="absolute left-1/2 bottom-0 w-[3px] h-full bg-green-600 -translate-x-1/2 rounded-full" />
+                <div className="absolute left-1/3 bottom-0 w-[3px] h-[85%] bg-green-500 -translate-x-1/2 rounded-full rotate-[-25deg]" />
+                <div className="absolute left-2/3 bottom-0 w-[3px] h-[85%] bg-green-500 -translate-x-1/2 rounded-full rotate-[25deg]" />
               </div>
               {/* Carrot body */}
               <div
@@ -89,31 +118,31 @@ export default function GameBoard({ rabbit, carrots, gridSize, gameState, score 
                   top: '30%',
                   left: '50%',
                   transform: 'translateX(-50%)',
-                  width: '50%',
+                  width: '55%',
                   height: '65%',
-                  background: 'linear-gradient(180deg, #fb923c 0%, #f97316 50%, #ea580c 100%)',
+                  background: 'linear-gradient(180deg, #fb923c 0%, #f97316 50%, #c2410c 100%)',
                   clipPath: 'polygon(20% 0%, 80% 0%, 100% 40%, 50% 100%, 0% 40%)',
-                  boxShadow: '0 0 12px rgba(249, 115, 22, 0.6)',
+                  boxShadow: '0 0 15px rgba(249, 115, 22, 0.7), inset -3px -3px 6px rgba(0,0,0,0.3)',
                 }}
               />
-              {/* Carrot lines */}
+              {/* Carrot highlight */}
               <div
                 className="absolute"
                 style={{
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  width: '30%',
-                  height: '2px',
-                  background: 'rgba(154, 52, 18, 0.5)',
-                  borderRadius: '1px',
+                  top: '35%',
+                  left: '42%',
+                  width: '12%',
+                  height: '30%',
+                  background: 'rgba(255,255,255,0.3)',
+                  borderRadius: '50%',
+                  filter: 'blur(1px)',
                 }}
               />
             </div>
           </div>
         ))}
 
-        {/* Rabbit */}
+        {/* Rabbit - top-down perspective with taller segments */}
         {rabbit.map((segment, index) => {
           const isHead = index === 0;
           const opacity = Math.max(0.55, 1 - (index / Math.max(rabbit.length, 1)) * 0.45);
@@ -126,25 +155,40 @@ export default function GameBoard({ rabbit, carrots, gridSize, gameState, score 
                 left: `${segment.x * cellSize}%`,
                 top: `${segment.y * cellSize}%`,
                 width: `${cellSize}%`,
-                height: `${cellSize}%`,
+                height: `${cellSize * heightStretch}%`,
                 opacity,
-                zIndex: isHead ? 10 : 1,
+                zIndex: isHead ? 20 : 10 - index,
               }}
             >
+              {/* Shadow beneath rabbit */}
+              <div
+                className="absolute"
+                style={{
+                  bottom: '5%',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: isHead ? '70%' : '60%',
+                  height: '15%',
+                  background: 'rgba(0,0,0,0.5)',
+                  borderRadius: '50%',
+                  filter: 'blur(3px)',
+                }}
+              />
+
               {isHead ? (
-                // Rabbit head with ears
+                // Rabbit head - top-down view
                 <div className="relative w-full h-full flex items-center justify-center">
                   {/* Left ear */}
                   <div
                     className="absolute"
                     style={{
-                      top: '-15%',
-                      left: '15%',
-                      width: '22%',
-                      height: '45%',
+                      top: '5%',
+                      left: '12%',
+                      width: '24%',
+                      height: '35%',
                       background: 'linear-gradient(180deg, #fef3c7 0%, #fde68a 100%)',
                       borderRadius: '50% 50% 40% 40%',
-                      boxShadow: '0 0 4px rgba(253, 230, 138, 0.4)',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.3), inset -2px -2px 4px rgba(0,0,0,0.1)',
                     }}
                   >
                     <div
@@ -156,13 +200,13 @@ export default function GameBoard({ rabbit, carrots, gridSize, gameState, score 
                   <div
                     className="absolute"
                     style={{
-                      top: '-15%',
-                      right: '15%',
-                      width: '22%',
-                      height: '45%',
+                      top: '5%',
+                      right: '12%',
+                      width: '24%',
+                      height: '35%',
                       background: 'linear-gradient(180deg, #fef3c7 0%, #fde68a 100%)',
                       borderRadius: '50% 50% 40% 40%',
-                      boxShadow: '0 0 4px rgba(253, 230, 138, 0.4)',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.3), inset -2px -2px 4px rgba(0,0,0,0.1)',
                     }}
                   >
                     <div
@@ -170,14 +214,15 @@ export default function GameBoard({ rabbit, carrots, gridSize, gameState, score 
                       style={{ background: '#fca5a5' }}
                     />
                   </div>
-                  {/* Head */}
+                  {/* Head - top-down oval */}
                   <div
                     className="rounded-full"
                     style={{
-                      width: '70%',
-                      height: '70%',
-                      background: 'linear-gradient(135deg, #fef9c3 0%, #fde68a 100%)',
-                      boxShadow: '0 0 10px rgba(253, 230, 138, 0.6)',
+                      width: '75%',
+                      height: '65%',
+                      marginTop: '15%',
+                      background: 'radial-gradient(ellipse at 40% 35%, #fffbeb 0%, #fef3c7 50%, #fde68a 100%)',
+                      boxShadow: '0 4px 8px rgba(0,0,0,0.4), inset -3px -3px 6px rgba(0,0,0,0.1), inset 2px 2px 4px rgba(255,255,255,0.3)',
                       position: 'relative',
                     }}
                   >
@@ -185,45 +230,81 @@ export default function GameBoard({ rabbit, carrots, gridSize, gameState, score 
                     <div
                       className="absolute rounded-full bg-slate-900"
                       style={{
-                        width: '18%',
-                        height: '18%',
-                        top: '35%',
-                        left: '22%',
+                        width: '16%',
+                        height: '20%',
+                        top: '30%',
+                        left: '24%',
+                        boxShadow: 'inset 1px 1px 2px rgba(255,255,255,0.3)',
                       }}
-                    />
+                    >
+                      <div
+                        className="absolute rounded-full bg-white"
+                        style={{ width: '30%', height: '30%', top: '20%', left: '20%' }}
+                      />
+                    </div>
                     <div
                       className="absolute rounded-full bg-slate-900"
                       style={{
-                        width: '18%',
-                        height: '18%',
-                        top: '35%',
-                        right: '22%',
+                        width: '16%',
+                        height: '20%',
+                        top: '30%',
+                        right: '24%',
+                        boxShadow: 'inset 1px 1px 2px rgba(255,255,255,0.3)',
                       }}
-                    />
+                    >
+                      <div
+                        className="absolute rounded-full bg-white"
+                        style={{ width: '30%', height: '30%', top: '20%', left: '20%' }}
+                      />
+                    </div>
                     {/* Nose */}
                     <div
                       className="absolute rounded-full"
                       style={{
                         width: '14%',
                         height: '10%',
-                        bottom: '25%',
+                        bottom: '22%',
                         left: '50%',
                         transform: 'translateX(-50%)',
-                        background: '#f472b6',
+                        background: 'radial-gradient(ellipse at 40% 40%, #f9a8d4, #ec4899)',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                      }}
+                    />
+                    {/* Cheeks */}
+                    <div
+                      className="absolute rounded-full"
+                      style={{
+                        width: '18%',
+                        height: '12%',
+                        bottom: '25%',
+                        left: '12%',
+                        background: 'rgba(252, 165, 165, 0.4)',
+                        filter: 'blur(1px)',
+                      }}
+                    />
+                    <div
+                      className="absolute rounded-full"
+                      style={{
+                        width: '18%',
+                        height: '12%',
+                        bottom: '25%',
+                        right: '12%',
+                        background: 'rgba(252, 165, 165, 0.4)',
+                        filter: 'blur(1px)',
                       }}
                     />
                   </div>
                 </div>
               ) : (
-                // Rabbit body segments (fluffy white)
+                // Rabbit body segments - top-down fluffy view
                 <div className="w-full h-full flex items-center justify-center">
                   <div
                     className="rounded-full"
                     style={{
-                      width: '75%',
-                      height: '75%',
-                      background: 'linear-gradient(135deg, #fef9c3 0%, #fef3c7 100%)',
-                      boxShadow: 'inset 0 -2px 4px rgba(0,0,0,0.1)',
+                      width: '78%',
+                      height: '70%',
+                      background: 'radial-gradient(ellipse at 40% 35%, #fffbeb 0%, #fef3c7 60%, #fde68a 100%)',
+                      boxShadow: '0 3px 6px rgba(0,0,0,0.35), inset -2px -2px 4px rgba(0,0,0,0.1), inset 2px 2px 4px rgba(255,255,255,0.4)',
                     }}
                   />
                 </div>
@@ -234,34 +315,32 @@ export default function GameBoard({ rabbit, carrots, gridSize, gameState, score 
 
         {/* Overlay states */}
         {gameState === 'idle' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-[2px] rounded-full">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px]" style={{ borderRadius: 'inherit' }}>
             <div className="text-center px-4">
               <div className="text-5xl mb-3">🐰</div>
               <p className="text-2xl font-bold text-white mb-2">Rabbit Game</p>
               <p className="text-slate-300 text-sm">Help the rabbit find carrots!</p>
-              <p className="text-slate-400 text-xs mt-2">Press Start or Space to play</p>
             </div>
           </div>
         )}
 
         {gameState === 'paused' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-[2px] rounded-full">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px]" style={{ borderRadius: 'inherit' }}>
             <div className="text-center px-4">
               <div className="text-5xl mb-3">⏸️</div>
               <p className="text-3xl font-bold text-yellow-400">PAUSED</p>
-              <p className="text-slate-300 text-sm mt-2">Press Space or P to resume</p>
+              <p className="text-slate-300 text-sm mt-2">Press Space to resume</p>
             </div>
           </div>
         )}
 
         {gameState === 'gameover' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px] rounded-full">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/70 backdrop-blur-[2px]" style={{ borderRadius: 'inherit' }}>
             <div className="text-center px-4">
               <div className="text-5xl mb-3">😵</div>
               <p className="text-3xl font-bold text-red-400 mb-1">Oh No!</p>
               <p className="text-xl font-semibold text-white mb-1">Score: {score}</p>
               <p className="text-slate-300 text-sm">The rabbit got tired!</p>
-              <p className="text-slate-400 text-xs mt-2">Press Restart or Space to play again</p>
             </div>
           </div>
         )}

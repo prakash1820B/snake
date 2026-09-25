@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
-import { useGame, Direction, Difficulty } from './hooks/useGame';
+import { useGame, Direction } from './hooks/useGame';
 import GameBoard from './components/GameBoard';
 
 export default function App() {
@@ -8,7 +8,6 @@ export default function App() {
     carrots,
     gameState,
     score,
-    difficulty,
     highScore,
     gridSize,
     startGame,
@@ -16,33 +15,23 @@ export default function App() {
     togglePause,
     changeDirection,
     setDirectionFromTarget,
-    setDifficulty,
   } = useGame();
 
   const boardRef = useRef<HTMLDivElement>(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
-  // Fullscreen toggle
-  const toggleFullscreen = useCallback(() => {
+  // Handle Play button - enter fullscreen and start
+  const handlePlay = useCallback(() => {
+    // Try to enter fullscreen
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(err => {
-        console.log('Fullscreen error:', err);
+      document.documentElement.requestFullscreen().catch(() => {
+        // Fullscreen might fail, continue anyway
       });
-    } else {
-      document.exitFullscreen();
     }
-  }, []);
+    startGame();
+  }, [startGame]);
 
-  // Listen for fullscreen changes
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
-  // Mouse move handler - control rabbit with mouse hover
+  // Mouse move handler
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (gameState !== 'playing' || !boardRef.current) return;
 
@@ -50,14 +39,13 @@ export default function App() {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    // Convert to grid coordinates
     const gridX = (x / rect.width) * gridSize;
     const gridY = (y / rect.height) * gridSize;
 
     setDirectionFromTarget(gridX, gridY);
   }, [gameState, gridSize, setDirectionFromTarget]);
 
-  // Touch move handler - control rabbit with touch
+  // Touch move handler
   const handleTouchMove = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
     if (gameState !== 'playing' || !boardRef.current) return;
     e.preventDefault();
@@ -67,20 +55,18 @@ export default function App() {
     const x = touch.clientX - rect.left;
     const y = touch.clientY - rect.top;
 
-    // Convert to grid coordinates
     const gridX = (x / rect.width) * gridSize;
     const gridY = (y / rect.height) * gridSize;
 
     setDirectionFromTarget(gridX, gridY);
   }, [gameState, gridSize, setDirectionFromTarget]);
 
-  // Keyboard controls (fallback)
+  // Keyboard controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const key = e.key;
       const keyLower = key.toLowerCase();
 
-      // Prevent default for game keys
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(key)) {
         e.preventDefault();
       }
@@ -104,7 +90,7 @@ export default function App() {
           break;
         case ' ':
           if (gameState === 'idle' || gameState === 'gameover') {
-            startGame();
+            handlePlay();
           } else {
             togglePause();
           }
@@ -117,42 +103,30 @@ export default function App() {
         case 'r':
           resetGame();
           break;
-        case 'f':
-          toggleFullscreen();
+        case 'escape':
+          if (showHelp) setShowHelp(false);
           break;
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [gameState, changeDirection, startGame, togglePause, resetGame, toggleFullscreen]);
-
-  const difficulties: { value: Difficulty; label: string; color: string; emoji: string }[] = [
-    { value: 'easy', label: 'Easy', color: 'bg-green-500', emoji: '🟢' },
-    { value: 'medium', label: 'Medium', color: 'bg-yellow-500', emoji: '🟡' },
-    { value: 'hard', label: 'Hard', color: 'bg-red-500', emoji: '🔴' },
-  ];
+  }, [gameState, changeDirection, handlePlay, togglePause, resetGame, showHelp]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-950 via-green-950 to-emerald-950 text-white flex flex-col items-center p-4 py-6 select-none overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-emerald-950 to-slate-950 text-white flex flex-col items-center justify-center p-4 select-none overflow-hidden">
       {/* Header */}
-      <div className="text-center mb-3">
-        <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-amber-300 to-orange-400 bg-clip-text text-transparent">
+      <div className="text-center mb-4">
+        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-amber-300 to-orange-400 bg-clip-text text-transparent drop-shadow-lg">
           🐰 Rabbit Game
         </h1>
-        <p className="text-emerald-300/70 text-xs md:text-sm mt-1">Move your mouse to guide the rabbit!</p>
       </div>
 
       {/* Score Panel */}
-      <div className="flex items-center gap-6 mb-3 bg-emerald-900/40 rounded-xl px-6 py-3 border border-emerald-700/40">
+      <div className="flex items-center gap-6 mb-4 bg-black/40 rounded-2xl px-6 py-3 border border-emerald-700/30 backdrop-blur-sm">
         <div className="text-center">
-          <p className="text-[10px] text-emerald-300/70 uppercase tracking-wider font-semibold">🥕 Carrots</p>
+          <p className="text-[10px] text-emerald-300/70 uppercase tracking-wider font-semibold">🥕 Score</p>
           <p className="text-2xl md:text-3xl font-bold text-orange-400 tabular-nums leading-tight">{score}</p>
-        </div>
-        <div className="w-px h-10 bg-emerald-700/50" />
-        <div className="text-center">
-          <p className="text-[10px] text-emerald-300/70 uppercase tracking-wider font-semibold">🎯 On Board</p>
-          <p className="text-2xl md:text-3xl font-bold text-emerald-300 tabular-nums leading-tight">{carrots.length}</p>
         </div>
         <div className="w-px h-10 bg-emerald-700/50" />
         <div className="text-center">
@@ -161,7 +135,7 @@ export default function App() {
         </div>
       </div>
 
-      {/* Game Board with Mouse Control */}
+      {/* Game Board */}
       <div
         ref={boardRef}
         className="w-full max-w-[500px] cursor-none"
@@ -177,120 +151,137 @@ export default function App() {
         />
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
+      {/* Action Buttons - Just Help and Play */}
+      <div className="flex items-center justify-center gap-4 mt-6">
+        {/* Help Button */}
+        <button
+          onClick={() => setShowHelp(true)}
+          className="px-8 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-lg
+            transition-all duration-200 active:scale-95 shadow-lg border-2 border-slate-600
+            hover:border-emerald-500/50 hover:shadow-emerald-500/20"
+        >
+          ❓ Help
+        </button>
+
+        {/* Play Button */}
         {(gameState === 'idle' || gameState === 'gameover') && (
           <button
-            onClick={startGame}
-            className="px-5 py-2.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white font-semibold
-              transition-all duration-200 active:scale-95 shadow-lg shadow-orange-600/30"
+            onClick={handlePlay}
+            className="px-8 py-3 rounded-xl bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500
+              text-white font-bold text-lg transition-all duration-200 active:scale-95
+              shadow-lg shadow-orange-600/40 hover:shadow-orange-500/60 border-2 border-orange-400/30"
           >
-            {gameState === 'gameover' ? '🔄 Try Again' : '▶ Start Game'}
+            ▶ Play
           </button>
         )}
 
+        {/* Pause Button (during gameplay) */}
         {gameState === 'playing' && (
           <button
             onClick={togglePause}
-            className="px-5 py-2.5 rounded-lg bg-yellow-600 hover:bg-yellow-500 text-white font-semibold
+            className="px-8 py-3 rounded-xl bg-yellow-600 hover:bg-yellow-500 text-white font-bold text-lg
               transition-all duration-200 active:scale-95 shadow-lg shadow-yellow-600/30"
           >
             ⏸ Pause
           </button>
         )}
 
+        {/* Resume Button */}
         {gameState === 'paused' && (
-          <>
-            <button
-              onClick={togglePause}
-              className="px-5 py-2.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white font-semibold
-                transition-all duration-200 active:scale-95 shadow-lg shadow-orange-600/30"
-            >
-              ▶ Resume
-            </button>
-            <button
-              onClick={resetGame}
-              className="px-5 py-2.5 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white font-semibold
-                transition-all duration-200 active:scale-95 border border-emerald-600"
-            >
-              🔄 Reset
-            </button>
-          </>
-        )}
-
-        {(gameState === 'playing' || gameState === 'gameover') && (
           <button
-            onClick={resetGame}
-            className="px-5 py-2.5 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white font-semibold
-              transition-all duration-200 active:scale-95 border border-emerald-600"
+            onClick={togglePause}
+            className="px-8 py-3 rounded-xl bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500
+              text-white font-bold text-lg transition-all duration-200 active:scale-95
+              shadow-lg shadow-orange-600/40"
           >
-            🔄 Reset
+            ▶ Resume
           </button>
         )}
-
-        {/* Fullscreen Button */}
-        <button
-          onClick={toggleFullscreen}
-          className="px-5 py-2.5 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white font-semibold
-            transition-all duration-200 active:scale-95 border border-emerald-600"
-          title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
-        >
-          {isFullscreen ? '⛶ Exit' : '⛶ Fullscreen'}
-        </button>
       </div>
 
-      {/* Difficulty Selector */}
-      <div className="flex items-center gap-2 mt-4">
-        <span className="text-xs text-emerald-300/70 uppercase tracking-wider font-semibold mr-1">
-          Speed:
-        </span>
-        {difficulties.map(d => (
-          <button
-            key={d.value}
-            onClick={() => {
-              if (difficulty !== d.value) {
-                setDifficulty(d.value);
-                if (gameState === 'playing' || gameState === 'paused') {
-                  resetGame();
-                }
-              }
-            }}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200
-              ${
-                difficulty === d.value
-                  ? `${d.color} text-white shadow-lg scale-105`
-                  : 'bg-emerald-900/50 text-emerald-200 hover:bg-emerald-800/60 border border-emerald-700/50'
-              }`}
-          >
-            {d.emoji} {d.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Control hints */}
-      <div className="flex flex-wrap items-center justify-center gap-3 mt-4 text-xs text-emerald-400/60">
-        <span className="flex items-center gap-1">
-          <span className="px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-200 text-[10px] font-mono border border-emerald-700/50">🖱️ Mouse</span>
-          <span>Move rabbit</span>
-        </span>
-        <span className="hidden md:flex items-center gap-1">
-          <kbd className="px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-200 text-[10px] font-mono border border-emerald-700/50">↑↓←→</kbd>
-          <span>or keys</span>
-        </span>
-        <span className="flex items-center gap-1">
-          <kbd className="px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-200 text-[10px] font-mono border border-emerald-700/50">Space</kbd>
-          <span>Start/Pause</span>
-        </span>
-        <span className="hidden md:flex items-center gap-1">
-          <kbd className="px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-200 text-[10px] font-mono border border-emerald-700/50">F</kbd>
-          <span>Fullscreen</span>
-        </span>
-      </div>
-
-      {/* Footer */}
-      <p className="text-emerald-700/60 text-[10px] mt-4 text-center">
-        Hover mouse over the circle to guide the rabbit • 🐰 loves 🥕
+      {/* Footer hint */}
+      <p className="text-emerald-700/60 text-xs mt-4 text-center">
+        Move mouse over the circle to guide the rabbit
       </p>
+
+      {/* Help Modal */}
+      {showHelp && (
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setShowHelp(false)}
+        >
+          <div
+            className="bg-gradient-to-br from-slate-900 to-emerald-950 rounded-2xl p-6 md:p-8 max-w-md w-full
+              border-2 border-emerald-600/50 shadow-2xl shadow-emerald-500/20"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-emerald-400">🐰 How to Play</h2>
+              <button
+                onClick={() => setShowHelp(false)}
+                className="text-slate-400 hover:text-white text-2xl font-bold w-8 h-8 flex items-center justify-center
+                  rounded-lg hover:bg-slate-700 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4 text-slate-200">
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">🖱️</span>
+                <div>
+                  <p className="font-semibold text-white">Mouse Control</p>
+                  <p className="text-sm text-slate-400">Move your mouse over the circle to guide the rabbit</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">🥕</span>
+                <div>
+                  <p className="font-semibold text-white">Collect Carrots</p>
+                  <p className="text-sm text-slate-400">Eat carrots to grow longer and earn points</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">🔄</span>
+                <div>
+                  <p className="font-semibold text-white">Wrap Around</p>
+                  <p className="text-sm text-slate-400">Exit one side of the circle, appear on the opposite side</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">⚠️</span>
+                <div>
+                  <p className="font-semibold text-white">Avoid Yourself</p>
+                  <p className="text-sm text-slate-400">Don't hit your own body or the game ends!</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">⌨️</span>
+                <div>
+                  <p className="font-semibold text-white">Keyboard</p>
+                  <p className="text-sm text-slate-400">Arrow keys or WASD also work • Space to pause</p>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                setShowHelp(false);
+                handlePlay();
+              }}
+              className="w-full mt-6 px-6 py-3 rounded-xl bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500
+                text-white font-bold text-lg transition-all duration-200 active:scale-95
+                shadow-lg shadow-orange-600/40"
+            >
+              ▶ Start Playing
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
