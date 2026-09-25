@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { useSnakeGame, Direction, Difficulty } from './hooks/useSnakeGame';
 import GameBoard from './components/GameBoard';
 import TouchControls from './components/TouchControls';
@@ -21,6 +21,27 @@ export default function App() {
 
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Fullscreen toggle
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.log('Fullscreen error:', err);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  }, []);
+
+  // Listen for fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
 
   // Keyboard controls
   useEffect(() => {
@@ -65,12 +86,15 @@ export default function App() {
         case 'r':
           resetGame();
           break;
+        case 'f':
+          toggleFullscreen();
+          break;
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [gameState, changeDirection, startGame, togglePause, resetGame]);
+  }, [gameState, changeDirection, startGame, togglePause, resetGame, toggleFullscreen]);
 
   // Swipe controls on game board only
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -195,6 +219,16 @@ export default function App() {
             🔄 Reset
           </button>
         )}
+
+        {/* Fullscreen Button */}
+        <button
+          onClick={toggleFullscreen}
+          className="px-5 py-2.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-semibold
+            transition-all duration-200 active:scale-95 border border-slate-600"
+          title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+        >
+          {isFullscreen ? '⛶ Exit' : '⛶ Fullscreen'}
+        </button>
       </div>
 
       {/* Difficulty Selector */}
@@ -249,11 +283,15 @@ export default function App() {
           <kbd className="px-1.5 py-0.5 rounded bg-slate-700/80 text-slate-300 text-[10px] font-mono border border-slate-600">R</kbd>
           <span>Reset</span>
         </span>
+        <span className="flex items-center gap-1">
+          <kbd className="px-1.5 py-0.5 rounded bg-slate-700/80 text-slate-300 text-[10px] font-mono border border-slate-600">F</kbd>
+          <span>Fullscreen</span>
+        </span>
       </div>
 
       {/* Footer */}
       <p className="text-slate-600 text-[10px] mt-4 text-center">
-        Swipe on the game board or use arrow keys • Built with React + TypeScript
+        Swipe or use arrow keys • Press F for fullscreen • Built with React + TypeScript
       </p>
     </div>
   );

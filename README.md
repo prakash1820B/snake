@@ -12,8 +12,9 @@
 
 | Feature | Description |
 |---------|-------------|
-| 🎮 **Keyboard Controls** | Arrow keys or WASD to move, Space to start/pause, R to reset |
-| 📱 **Touch Controls** | Swipe gestures on game board + on-screen D-pad for mobile |
+| 🎮 **Keyboard Controls** | Arrow keys or WASD to move, Space to start/pause, R to reset, F for fullscreen |
+| 📱 **Touch Controls** | Swipe gestures on game board + on-screen D-pad for all devices |
+| 🖥️ **Fullscreen Mode** | Immersive fullscreen gameplay with F key or button |
 | ⏸ **Pause & Restart** | Full game state management (idle, playing, paused, game over) |
 | 🎯 **3 Difficulty Levels** | Easy, Medium, Hard — different speeds & scoring |
 | 🏆 **High Score Tracking** | Best score persisted via `localStorage` |
@@ -42,12 +43,14 @@
 | `Space` | Start / Pause / Resume |
 | `P` | Pause / Resume |
 | `R` | Reset game |
+| `F` | Toggle fullscreen |
 
 ### Mobile (Touch)
 
 - **Swipe** on the game board to change direction
-- **On-screen D-pad** buttons below the game board
+- **On-screen D-pad** buttons below the game board (visible on all devices)
 - **Tap** buttons to Start, Pause, or Reset
+- **Fullscreen button** for immersive gameplay
 
 ## 🎚 Difficulty Levels
 
