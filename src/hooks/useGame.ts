@@ -35,10 +35,12 @@ function wrapThroughCircle(pos: Position): Position {
   
   if (distance > RADIUS) {
     const angle = Math.atan2(dy, dx);
-    const wrappedDistance = distance - RADIUS * 2;
+    // Wrap to opposite side: if distance is RADIUS + X, wrap to RADIUS - X
+    const excessDistance = distance - RADIUS;
+    const wrappedDistance = RADIUS - excessDistance;
     return {
-      x: CENTER + Math.cos(angle + Math.PI) * Math.abs(wrappedDistance),
-      y: CENTER + Math.sin(angle + Math.PI) * Math.abs(wrappedDistance),
+      x: CENTER + Math.cos(angle + Math.PI) * wrappedDistance,
+      y: CENTER + Math.sin(angle + Math.PI) * wrappedDistance,
     };
   }
   

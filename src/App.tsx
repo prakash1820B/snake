@@ -131,7 +131,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [gameState, changeDirection, startGame, togglePause, resetGame, toggleFullscreen]);
+  }, [gameState, setDirectionFromTarget, startGame, togglePause, resetGame, toggleFullscreen]);
 
   // Mouse move handler - control rabbit with mouse hover
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -323,7 +323,7 @@ export default function App() {
           </button>
           {motionEnabled && (
             <div className="text-[10px] text-emerald-400/60 text-center">
-              Tilt your phone to guide the rabbit
+              Tilt your phone to guide the snake
               <div className="mt-1 font-mono">
                 β: {currentTilt.beta.toFixed(0)}° γ: {currentTilt.gamma.toFixed(0)}°
               </div>

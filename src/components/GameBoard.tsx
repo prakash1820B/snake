@@ -153,7 +153,7 @@ export default function GameBoard({ snake, food, gridSize, gameState, score }: G
 
           return (
             <div
-              key={`${index}`}
+              key={`segment-${index}`}
               className="absolute"
               style={{
                 left: `${segment.x * cellSize}%`,
@@ -162,7 +162,6 @@ export default function GameBoard({ snake, food, gridSize, gameState, score }: G
                 height: `${segmentSize}%`,
                 opacity,
                 zIndex: isHead ? 10 : snake.length - index,
-                transition: 'left 0.05s linear, top 0.05s linear',
               }}
             >
               {isHead ? (
