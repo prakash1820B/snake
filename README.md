@@ -14,13 +14,15 @@
 |---------|-------------|
 | 🐰 **Cute Rabbit** | Adorable rabbit character with ears, eyes, and fluffy body |
 | 🥕 **Tasty Carrots** | Collect delicious carrots to grow your rabbit's tail |
-| 🎮 **Keyboard Controls** | Arrow keys or WASD to move, Space to start/pause, R to reset, F for fullscreen |
-| 📱 **Touch Controls** | Swipe gestures on game board + on-screen D-pad for all devices |
+| 🖱️ **Mouse Control** | Move mouse over the circular board to guide the rabbit - intuitive and smooth! |
+| 🔄 **Circular Wrap** | Rabbit wraps through the circle boundary - exits one side, appears on opposite! |
+| 🎮 **Keyboard Fallback** | Arrow keys or WASD still work as alternative controls |
+| 📱 **Touch Support** | Touch and drag on mobile devices to control the rabbit |
 | 🖥️ **Fullscreen Mode** | Immersive fullscreen gameplay with F key or button |
 | ⏸ **Pause & Restart** | Full game state management (idle, playing, paused, game over) |
 | 🎯 **3 Difficulty Levels** | Easy, Medium, Hard — different speeds & scoring |
 | 🏆 **High Score Tracking** | Best score persisted via `localStorage` |
-| 🔴 **Circular Board** | Round game board with circular boundary - rabbit dies if it exits the circle |
+| 🔴 **Circular Board** | Round game board with radial gradient and wrap-around boundaries |
 | 🥕 **Multiple Carrots** | 1-5 random carrots on the board at once - eat one, a new one spawns! |
 | 🌿 **Garden Theme** | Beautiful green garden background with grass details |
 | ✨ **Modern UI** | Dark theme, gradients, smooth animations, glass-morphism overlays |
@@ -31,16 +33,23 @@
 ## 🎮 How to Play
 
 1. Press **Start Game** or **Space** to begin
-2. Guide the rabbit 🐰 to eat the carrots 🥕 on the **circular board**
-3. The rabbit grows longer with each carrot eaten
-4. **Multiple carrots** (1-5) appear on the board at once - eat one and a new one spawns!
-5. Stay within the **circular boundary** - if the rabbit exits the circle, game over!
-6. Avoid hitting your own body
-7. Try to beat your high score! 🏆
+2. **Move your mouse** over the circular board to guide the rabbit 🐰
+3. The rabbit will follow your mouse cursor - just hover in the direction you want to go!
+4. Collect carrots 🥕 to grow longer and earn points
+5. **Multiple carrots** (1-5) appear on the board at once - eat one and a new one spawns!
+6. The rabbit **wraps around** the circular boundary - exit one side, appear on the opposite!
+7. Avoid hitting your own body
+8. Try to beat your high score! 🏆
 
 ## 🕹 Controls
 
-### Desktop (Keyboard)
+### Mouse Control (Primary)
+
+- **Move mouse** over the circular game board to guide the rabbit
+- The rabbit follows your cursor - just hover in the direction you want to go!
+- Works on both desktop and touch devices (touch and drag)
+
+### Keyboard (Fallback)
 
 | Key | Action |
 |-----|--------|
@@ -50,12 +59,11 @@
 | `R` | Reset game |
 | `F` | Toggle fullscreen |
 
-### Mobile (Touch)
+### Touch (Mobile)
 
-- **Swipe** on the game board to change direction
-- **On-screen D-pad** buttons below the game board (visible on all devices)
-- **Tap** buttons to Start, Pause, or Reset
-- **Fullscreen button** for immersive gameplay
+- **Touch and drag** on the game board to guide the rabbit
+- The rabbit follows your finger movement
+- Tap buttons to Start, Pause, or Reset
 
 ## 🎚 Difficulty Levels
 
@@ -124,9 +132,11 @@ rabbit-game/
 
 ## 🧠 Implementation Highlights
 
+- **Mouse Control** — Rabbit follows mouse cursor position using coordinate mapping and direction calculation
+- **Circular Wrap-Around** — When rabbit exits the circle, it reappears on the opposite side using reflection math
 - **Circular Board** — Round game board with boundary detection using distance formula from center
 - **Multiple Carrots** — Random 1-5 carrots spawn at game start, new carrot spawns when one is eaten
-- **Direction Queue** — Prevents rapid key presses from causing the rabbit to reverse into itself
+- **Direction Queue** — Prevents rapid inputs from causing the rabbit to reverse into itself
 - **Ref-based Game Loop** — Uses refs for carrots/score/direction to avoid stale closures in `setInterval`
 - **Efficient Rendering** — Uses stable keys for rabbit segments, minimal re-renders
 - **Self-collision Optimization** — Excludes tail from collision check (since it moves away)

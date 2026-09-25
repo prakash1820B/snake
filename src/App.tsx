@@ -1,7 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { useGame, Direction, Difficulty } from './hooks/useGame';
 import GameBoard from './components/GameBoard';
-import TouchControls from './components/TouchControls';
 
 export default function App() {
   const {
@@ -16,10 +15,10 @@ export default function App() {
     resetGame,
     togglePause,
     changeDirection,
+    setDirectionFromTarget,
     setDifficulty,
   } = useGame();
 
-  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -43,7 +42,39 @@ export default function App() {
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
-  // Keyboard controls
+  // Mouse move handler - control rabbit with mouse hover
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (gameState !== 'playing' || !boardRef.current) return;
+
+    const rect = boardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    // Convert to grid coordinates
+    const gridX = (x / rect.width) * gridSize;
+    const gridY = (y / rect.height) * gridSize;
+
+    setDirectionFromTarget(gridX, gridY);
+  }, [gameState, gridSize, setDirectionFromTarget]);
+
+  // Touch move handler - control rabbit with touch
+  const handleTouchMove = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    if (gameState !== 'playing' || !boardRef.current) return;
+    e.preventDefault();
+
+    const touch = e.touches[0];
+    const rect = boardRef.current.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+
+    // Convert to grid coordinates
+    const gridX = (x / rect.width) * gridSize;
+    const gridY = (y / rect.height) * gridSize;
+
+    setDirectionFromTarget(gridX, gridY);
+  }, [gameState, gridSize, setDirectionFromTarget]);
+
+  // Keyboard controls (fallback)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const key = e.key;
@@ -96,34 +127,6 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [gameState, changeDirection, startGame, togglePause, resetGame, toggleFullscreen]);
 
-  // Swipe controls on game board only
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
-  }, []);
-
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (!touchStartRef.current) return;
-    const touch = e.changedTouches[0];
-    const dx = touch.clientX - touchStartRef.current.x;
-    const dy = touch.clientY - touchStartRef.current.y;
-    const minSwipe = 20;
-
-    if (Math.abs(dx) < minSwipe && Math.abs(dy) < minSwipe) {
-      touchStartRef.current = null;
-      return;
-    }
-
-    if (gameState === 'playing') {
-      if (Math.abs(dx) > Math.abs(dy)) {
-        changeDirection(dx > 0 ? 'RIGHT' : 'LEFT');
-      } else {
-        changeDirection(dy > 0 ? 'DOWN' : 'UP');
-      }
-    }
-    touchStartRef.current = null;
-  }, [changeDirection, gameState]);
-
   const difficulties: { value: Difficulty; label: string; color: string; emoji: string }[] = [
     { value: 'easy', label: 'Easy', color: 'bg-green-500', emoji: '🟢' },
     { value: 'medium', label: 'Medium', color: 'bg-yellow-500', emoji: '🟡' },
@@ -137,7 +140,7 @@ export default function App() {
         <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-amber-300 to-orange-400 bg-clip-text text-transparent">
           🐰 Rabbit Game
         </h1>
-        <p className="text-emerald-300/70 text-xs md:text-sm mt-1">Help the hungry rabbit collect carrots!</p>
+        <p className="text-emerald-300/70 text-xs md:text-sm mt-1">Move your mouse to guide the rabbit!</p>
       </div>
 
       {/* Score Panel */}
@@ -158,12 +161,12 @@ export default function App() {
         </div>
       </div>
 
-      {/* Game Board */}
+      {/* Game Board with Mouse Control */}
       <div
         ref={boardRef}
-        className="w-full max-w-[500px]"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
+        className="w-full max-w-[500px] cursor-none"
+        onMouseMove={handleMouseMove}
+        onTouchMove={handleTouchMove}
       >
         <GameBoard
           rabbit={rabbit}
@@ -264,31 +267,21 @@ export default function App() {
         ))}
       </div>
 
-      {/* Touch Controls (All devices) */}
-      <TouchControls
-        onDirection={changeDirection}
-        disabled={gameState !== 'playing'}
-      />
-
-      {/* Keyboard hints (Desktop only) */}
-      <div className="hidden md:flex flex-wrap items-center justify-center gap-3 mt-4 text-xs text-emerald-400/60">
+      {/* Control hints */}
+      <div className="flex flex-wrap items-center justify-center gap-3 mt-4 text-xs text-emerald-400/60">
         <span className="flex items-center gap-1">
+          <span className="px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-200 text-[10px] font-mono border border-emerald-700/50">🖱️ Mouse</span>
+          <span>Move rabbit</span>
+        </span>
+        <span className="hidden md:flex items-center gap-1">
           <kbd className="px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-200 text-[10px] font-mono border border-emerald-700/50">↑↓←→</kbd>
-          <span>Move</span>
+          <span>or keys</span>
         </span>
         <span className="flex items-center gap-1">
           <kbd className="px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-200 text-[10px] font-mono border border-emerald-700/50">Space</kbd>
-          <span>Start / Pause</span>
+          <span>Start/Pause</span>
         </span>
-        <span className="flex items-center gap-1">
-          <kbd className="px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-200 text-[10px] font-mono border border-emerald-700/50">P</kbd>
-          <span>Pause</span>
-        </span>
-        <span className="flex items-center gap-1">
-          <kbd className="px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-200 text-[10px] font-mono border border-emerald-700/50">R</kbd>
-          <span>Reset</span>
-        </span>
-        <span className="flex items-center gap-1">
+        <span className="hidden md:flex items-center gap-1">
           <kbd className="px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-200 text-[10px] font-mono border border-emerald-700/50">F</kbd>
           <span>Fullscreen</span>
         </span>
@@ -296,7 +289,7 @@ export default function App() {
 
       {/* Footer */}
       <p className="text-emerald-700/60 text-[10px] mt-4 text-center">
-        Swipe or use arrow keys • Press F for fullscreen • 🐰 loves 🥕
+        Hover mouse over the circle to guide the rabbit • 🐰 loves 🥕
       </p>
     </div>
   );
