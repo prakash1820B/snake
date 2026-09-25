@@ -2,25 +2,27 @@ import { Position } from '../hooks/useGame';
 
 interface GameBoardProps {
   rabbit: Position[];
-  carrot: Position;
+  carrots: Position[];
   gridSize: number;
   gameState: string;
   score: number;
 }
 
-export default function GameBoard({ rabbit, carrot, gridSize, gameState, score }: GameBoardProps) {
+export default function GameBoard({ rabbit, carrots, gridSize, gameState, score }: GameBoardProps) {
   const cellSize = 100 / gridSize;
 
   return (
     <div className="relative w-full aspect-square max-w-[500px] mx-auto">
+      {/* Circular game board */}
       <div
-        className="absolute inset-0 rounded-xl border-2 border-emerald-800/50 overflow-hidden"
+        className="absolute inset-0 rounded-full border-4 border-emerald-700/60 overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, #1a3a2e 0%, #0f2818 50%, #1a3a2e 100%)',
+          background: 'radial-gradient(circle at center, #1a3a2e 0%, #0f2818 70%, #0a1f12 100%)',
+          boxShadow: '0 0 30px rgba(16, 185, 129, 0.2), inset 0 0 60px rgba(0, 0, 0, 0.3)',
         }}
       >
-        {/* Grass-like grid pattern */}
-        <svg className="absolute inset-0 w-full h-full opacity-[0.08]" aria-hidden="true">
+        {/* Circular grid pattern */}
+        <svg className="absolute inset-0 w-full h-full opacity-[0.06]" aria-hidden="true">
           {Array.from({ length: gridSize - 1 }).map((_, i) => (
             <g key={i}>
               <line
@@ -43,80 +45,73 @@ export default function GameBoard({ rabbit, carrot, gridSize, gameState, score }
           ))}
         </svg>
 
-        {/* Decorative grass tufts */}
-        <svg className="absolute inset-0 w-full h-full opacity-[0.15]" aria-hidden="true">
-          {Array.from({ length: 12 }).map((_, i) => {
-            const x = ((i * 37) % gridSize) * cellSize + cellSize / 2;
-            const y = ((i * 53) % gridSize) * cellSize + cellSize / 2;
-            return (
-              <g key={i} transform={`translate(${x}%, ${y}%)`}>
-                <path
-                  d={`M 0,0 Q -1,-3 -2,-5 M 0,0 Q 0,-3 0,-6 M 0,0 Q 1,-3 2,-5`}
-                  stroke="#86efac"
-                  strokeWidth="0.3"
-                  fill="none"
-                  transform={`translate(${x * 0.1}, ${y * 0.1})`}
-                />
-              </g>
-            );
-          })}
-        </svg>
-
-        {/* Carrot */}
+        {/* Circular boundary indicator */}
         <div
-          className="absolute animate-pulse"
+          className="absolute inset-[2%] rounded-full border-2 border-emerald-600/20"
           style={{
-            left: `${carrot.x * cellSize}%`,
-            top: `${carrot.y * cellSize}%`,
-            width: `${cellSize}%`,
-            height: `${cellSize}%`,
+            boxShadow: 'inset 0 0 20px rgba(16, 185, 129, 0.1)',
           }}
-        >
-          <div className="relative w-full h-full flex items-center justify-center">
-            {/* Carrot leaves on top */}
-            <div
-              className="absolute"
-              style={{
-                top: '8%',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '40%',
-                height: '30%',
-              }}
-            >
-              <div className="absolute left-1/2 bottom-0 w-[3px] h-full bg-green-500 -translate-x-1/2 rounded-full" />
-              <div className="absolute left-1/3 bottom-0 w-[3px] h-[80%] bg-green-400 -translate-x-1/2 rounded-full rotate-[-20deg]" />
-              <div className="absolute left-2/3 bottom-0 w-[3px] h-[80%] bg-green-400 -translate-x-1/2 rounded-full rotate-[20deg]" />
+        />
+
+        {/* Multiple Carrots */}
+        {carrots.map((carrot, index) => (
+          <div
+            key={`carrot-${index}`}
+            className="absolute animate-pulse"
+            style={{
+              left: `${carrot.x * cellSize}%`,
+              top: `${carrot.y * cellSize}%`,
+              width: `${cellSize}%`,
+              height: `${cellSize}%`,
+              animationDelay: `${index * 0.2}s`,
+            }}
+          >
+            <div className="relative w-full h-full flex items-center justify-center">
+              {/* Carrot leaves on top */}
+              <div
+                className="absolute"
+                style={{
+                  top: '8%',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '40%',
+                  height: '30%',
+                }}
+              >
+                <div className="absolute left-1/2 bottom-0 w-[3px] h-full bg-green-500 -translate-x-1/2 rounded-full" />
+                <div className="absolute left-1/3 bottom-0 w-[3px] h-[80%] bg-green-400 -translate-x-1/2 rounded-full rotate-[-20deg]" />
+                <div className="absolute left-2/3 bottom-0 w-[3px] h-[80%] bg-green-400 -translate-x-1/2 rounded-full rotate-[20deg]" />
+              </div>
+              {/* Carrot body */}
+              <div
+                className="absolute"
+                style={{
+                  top: '30%',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '50%',
+                  height: '65%',
+                  background: 'linear-gradient(180deg, #fb923c 0%, #f97316 50%, #ea580c 100%)',
+                  clipPath: 'polygon(20% 0%, 80% 0%, 100% 40%, 50% 100%, 0% 40%)',
+                  boxShadow: '0 0 12px rgba(249, 115, 22, 0.6)',
+                }}
+              />
+              {/* Carrot lines */}
+              <div
+                className="absolute"
+                style={{
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '30%',
+                  height: '2px',
+                  background: 'rgba(154, 52, 18, 0.5)',
+                  borderRadius: '1px',
+                }}
+              />
             </div>
-            {/* Carrot body */}
-            <div
-              className="absolute"
-              style={{
-                top: '30%',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '50%',
-                height: '65%',
-                background: 'linear-gradient(180deg, #fb923c 0%, #f97316 50%, #ea580c 100%)',
-                clipPath: 'polygon(20% 0%, 80% 0%, 100% 40%, 50% 100%, 0% 40%)',
-                boxShadow: '0 0 12px rgba(249, 115, 22, 0.6)',
-              }}
-            />
-            {/* Carrot lines */}
-            <div
-              className="absolute"
-              style={{
-                top: '50%',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '30%',
-                height: '2px',
-                background: 'rgba(154, 52, 18, 0.5)',
-                borderRadius: '1px',
-              }}
-            />
           </div>
-        </div>
+        ))}
 
         {/* Rabbit */}
         {rabbit.map((segment, index) => {
@@ -239,7 +234,7 @@ export default function GameBoard({ rabbit, carrot, gridSize, gameState, score }
 
         {/* Overlay states */}
         {gameState === 'idle' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-[2px] rounded-xl">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-[2px] rounded-full">
             <div className="text-center px-4">
               <div className="text-5xl mb-3">🐰</div>
               <p className="text-2xl font-bold text-white mb-2">Rabbit Game</p>
@@ -250,7 +245,7 @@ export default function GameBoard({ rabbit, carrot, gridSize, gameState, score }
         )}
 
         {gameState === 'paused' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-[2px] rounded-xl">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-[2px] rounded-full">
             <div className="text-center px-4">
               <div className="text-5xl mb-3">⏸️</div>
               <p className="text-3xl font-bold text-yellow-400">PAUSED</p>
@@ -260,7 +255,7 @@ export default function GameBoard({ rabbit, carrot, gridSize, gameState, score }
         )}
 
         {gameState === 'gameover' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px] rounded-xl">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px] rounded-full">
             <div className="text-center px-4">
               <div className="text-5xl mb-3">😵</div>
               <p className="text-3xl font-bold text-red-400 mb-1">Oh No!</p>

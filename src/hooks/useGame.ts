@@ -6,6 +6,8 @@ export type Difficulty = 'easy' | 'medium' | 'hard';
 export type GameState = 'idle' | 'playing' | 'paused' | 'gameover';
 
 const GRID_SIZE = 20;
+const CENTER = GRID_SIZE / 2;
+const RADIUS = GRID_SIZE / 2;
 
 const SPEED_MAP: Record<Difficulty, number> = {
   easy: 180,
@@ -19,7 +21,16 @@ const POINTS_MAP: Record<Difficulty, number> = {
   hard: 20,
 };
 
-function getRandomPosition(exclude: Position[]): Position {
+// Check if position is within circular boundary
+function isInCircle(pos: Position): boolean {
+  const dx = pos.x - CENTER + 0.5;
+  const dy = pos.y - CENTER + 0.5;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  return distance <= RADIUS;
+}
+
+// Get random position within circle
+function getRandomPositionInCircle(exclude: Position[]): Position {
   let pos: Position;
   let attempts = 0;
   do {
@@ -28,9 +39,19 @@ function getRandomPosition(exclude: Position[]): Position {
       y: Math.floor(Math.random() * GRID_SIZE),
     };
     attempts++;
-    if (attempts > 1000) break; // safety valve
-  } while (exclude.some(s => s.x === pos.x && s.y === pos.y));
+    if (attempts > 1000) break;
+  } while (!isInCircle(pos) || exclude.some(s => s.x === pos.x && s.y === pos.y));
   return pos;
+}
+
+// Generate multiple carrots (1-5 random)
+function generateCarrots(rabbit: Position[], count: number): Position[] {
+  const carrots: Position[] = [];
+  for (let i = 0; i < count; i++) {
+    const exclude = [...rabbit, ...carrots];
+    carrots.push(getRandomPositionInCircle(exclude));
+  }
+  return carrots;
 }
 
 const INITIAL_RABBIT: Position[] = [
@@ -48,7 +69,7 @@ const OPPOSITES: Record<Direction, Direction> = {
 
 export function useGame() {
   const [rabbit, setRabbit] = useState<Position[]>(INITIAL_RABBIT);
-  const [carrot, setCarrot] = useState<Position>({ x: 15, y: 10 });
+  const [carrots, setCarrots] = useState<Position[]>(() => generateCarrots(INITIAL_RABBIT, 3));
   const [gameState, setGameState] = useState<GameState>('idle');
   const [score, setScore] = useState(0);
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
@@ -64,14 +85,15 @@ export function useGame() {
   // Refs to avoid stale closures in game loop
   const directionRef = useRef<Direction>('RIGHT');
   const nextDirectionRef = useRef<Direction>('RIGHT');
-  const carrotRef = useRef<Position>({ x: 15, y: 10 });
+  const carrotsRef = useRef<Position[]>(carrots);
   const scoreRef = useRef(0);
   const difficultyRef = useRef<Difficulty>('medium');
   const gameStateRef = useRef<GameState>('idle');
   const directionQueueRef = useRef<Direction[]>([]);
+  const carrotCountRef = useRef(3);
 
   // Keep refs in sync with state
-  useEffect(() => { carrotRef.current = carrot; }, [carrot]);
+  useEffect(() => { carrotsRef.current = carrots; }, [carrots]);
   useEffect(() => { scoreRef.current = score; }, [score]);
   useEffect(() => { difficultyRef.current = difficulty; }, [difficulty]);
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
@@ -94,9 +116,11 @@ export function useGame() {
   const resetGame = useCallback(() => {
     const initialRabbit = [...INITIAL_RABBIT];
     setRabbit(initialRabbit);
-    const newCarrot = getRandomPosition(initialRabbit);
-    setCarrot(newCarrot);
-    carrotRef.current = newCarrot;
+    const count = Math.floor(Math.random() * 5) + 1; // 1-5 carrots
+    carrotCountRef.current = count;
+    const newCarrots = generateCarrots(initialRabbit, count);
+    setCarrots(newCarrots);
+    carrotsRef.current = newCarrots;
     directionRef.current = 'RIGHT';
     nextDirectionRef.current = 'RIGHT';
     directionQueueRef.current = [];
@@ -109,9 +133,11 @@ export function useGame() {
     if (gameStateRef.current === 'gameover' || gameStateRef.current === 'idle') {
       const initialRabbit = [...INITIAL_RABBIT];
       setRabbit(initialRabbit);
-      const newCarrot = getRandomPosition(initialRabbit);
-      setCarrot(newCarrot);
-      carrotRef.current = newCarrot;
+      const count = Math.floor(Math.random() * 5) + 1; // 1-5 carrots
+      carrotCountRef.current = count;
+      const newCarrots = generateCarrots(initialRabbit, count);
+      setCarrots(newCarrots);
+      carrotsRef.current = newCarrots;
       directionRef.current = 'RIGHT';
       nextDirectionRef.current = 'RIGHT';
       directionQueueRef.current = [];
@@ -130,14 +156,12 @@ export function useGame() {
   }, []);
 
   const changeDirection = useCallback((newDir: Direction) => {
-    // Queue direction changes to prevent rapid reversal
     const lastQueued = directionQueueRef.current.length > 0
       ? directionQueueRef.current[directionQueueRef.current.length - 1]
       : directionRef.current;
 
     if (OPPOSITES[newDir] !== lastQueued && newDir !== lastQueued) {
       directionQueueRef.current.push(newDir);
-      // Keep queue small
       if (directionQueueRef.current.length > 2) {
         directionQueueRef.current = directionQueueRef.current.slice(-2);
       }
@@ -149,7 +173,6 @@ export function useGame() {
     if (gameState !== 'playing') return;
 
     const tick = () => {
-      // Process direction queue
       if (directionQueueRef.current.length > 0) {
         const nextDir = directionQueueRef.current.shift()!;
         if (OPPOSITES[nextDir] !== directionRef.current) {
@@ -168,13 +191,13 @@ export function useGame() {
           case 'RIGHT': head.x += 1; break;
         }
 
-        // Wrap around edges (toroidal grid)
-        if (head.x < 0) head.x = GRID_SIZE - 1;
-        else if (head.x >= GRID_SIZE) head.x = 0;
-        if (head.y < 0) head.y = GRID_SIZE - 1;
-        else if (head.y >= GRID_SIZE) head.y = 0;
+        // Check if outside circular boundary
+        if (!isInCircle(head)) {
+          endGame();
+          return prevRabbit;
+        }
 
-        // Self collision (check against body, excluding tail since it will move)
+        // Self collision
         const bodyToCheck = prevRabbit.slice(0, -1);
         if (bodyToCheck.some(s => s.x === head.x && s.y === head.y)) {
           endGame();
@@ -182,19 +205,29 @@ export function useGame() {
         }
 
         const newRabbit = [head, ...prevRabbit];
-        const currentCarrot = carrotRef.current;
+        const currentCarrots = carrotsRef.current;
 
-        // Carrot collision
-        if (head.x === currentCarrot.x && head.y === currentCarrot.y) {
+        // Check if rabbit ate a carrot
+        const eatenIndex = currentCarrots.findIndex(c => c.x === head.x && c.y === head.y);
+        
+        if (eatenIndex !== -1) {
+          // Remove eaten carrot
+          const newCarrots = currentCarrots.filter((_, i) => i !== eatenIndex);
+          
+          // Spawn a new carrot to maintain count
+          const newCarrot = getRandomPositionInCircle([...newRabbit, ...newCarrots]);
+          newCarrots.push(newCarrot);
+          
+          setCarrots(newCarrots);
+          carrotsRef.current = newCarrots;
+          
           const points = POINTS_MAP[difficultyRef.current];
           setScore(prev => {
             const newScore = prev + points;
             scoreRef.current = newScore;
             return newScore;
           });
-          const newCarrot = getRandomPosition(newRabbit);
-          setCarrot(newCarrot);
-          carrotRef.current = newCarrot;
+          
           return newRabbit;
         }
 
@@ -209,7 +242,7 @@ export function useGame() {
 
   return {
     rabbit,
-    carrot,
+    carrots,
     gameState,
     score,
     difficulty,

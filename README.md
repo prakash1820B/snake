@@ -20,7 +20,8 @@
 | ⏸ **Pause & Restart** | Full game state management (idle, playing, paused, game over) |
 | 🎯 **3 Difficulty Levels** | Easy, Medium, Hard — different speeds & scoring |
 | 🏆 **High Score Tracking** | Best score persisted via `localStorage` |
-| 🔄 **Wrap-Around Edges** | Rabbit passes through walls and appears on the opposite side |
+| 🔴 **Circular Board** | Round game board with circular boundary - rabbit dies if it exits the circle |
+| 🥕 **Multiple Carrots** | 1-5 random carrots on the board at once - eat one, a new one spawns! |
 | 🌿 **Garden Theme** | Beautiful green garden background with grass details |
 | ✨ **Modern UI** | Dark theme, gradients, smooth animations, glass-morphism overlays |
 | 📐 **Fully Responsive** | Optimized for desktop and mobile screens |
@@ -30,11 +31,12 @@
 ## 🎮 How to Play
 
 1. Press **Start Game** or **Space** to begin
-2. Guide the rabbit 🐰 to eat the carrots 🥕
+2. Guide the rabbit 🐰 to eat the carrots 🥕 on the **circular board**
 3. The rabbit grows longer with each carrot eaten
-4. The rabbit **wraps around edges** — go off one side, appear on the other!
-5. Avoid hitting your own body
-6. Try to beat your high score! 🏆
+4. **Multiple carrots** (1-5) appear on the board at once - eat one and a new one spawns!
+5. Stay within the **circular boundary** - if the rabbit exits the circle, game over!
+6. Avoid hitting your own body
+7. Try to beat your high score! 🏆
 
 ## 🕹 Controls
 
@@ -122,20 +124,24 @@ rabbit-game/
 
 ## 🧠 Implementation Highlights
 
-- **Wrap-Around Edges** — Toroidal grid where the rabbit passes through walls and appears on the opposite side
+- **Circular Board** — Round game board with boundary detection using distance formula from center
+- **Multiple Carrots** — Random 1-5 carrots spawn at game start, new carrot spawns when one is eaten
 - **Direction Queue** — Prevents rapid key presses from causing the rabbit to reverse into itself
-- **Ref-based Game Loop** — Uses refs for carrot/score/direction to avoid stale closures in `setInterval`
+- **Ref-based Game Loop** — Uses refs for carrots/score/direction to avoid stale closures in `setInterval`
 - **Efficient Rendering** — Uses stable keys for rabbit segments, minimal re-renders
 - **Self-collision Optimization** — Excludes tail from collision check (since it moves away)
 - **localStorage Persistence** — High score survives page refreshes
-- **Pure CSS Graphics** — Rabbit and carrot drawn with CSS (no images needed)
+- **Pure CSS Graphics** — Rabbit and carrots drawn with CSS (no images needed)
+- **Radial Gradient Background** — Beautiful circular gradient for the game board
 
 ## 🎨 Visual Design
 
+- **Circular Board**: Round game board with emerald green border and radial gradient background
 - **Rabbit**: Cute white/cream character with pink ears, black eyes, and pink nose
-- **Carrot**: Orange triangular carrot with green leaves on top
-- **Background**: Dark green garden theme with subtle grass patterns
-- **Animations**: Smooth pulsing carrot, gradient effects, glass-morphism overlays
+- **Carrots**: Multiple orange triangular carrots with green leaves, each with staggered pulse animations
+- **Background**: Dark green garden theme with subtle circular grid patterns
+- **Animations**: Smooth pulsing carrots with staggered delays, gradient effects, glass-morphism overlays
+- **Boundary Indicator**: Subtle inner ring showing the circular play area
 
 ## 🤝 Contributing
 

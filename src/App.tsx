@@ -6,7 +6,7 @@ import TouchControls from './components/TouchControls';
 export default function App() {
   const {
     rabbit,
-    carrot,
+    carrots,
     gameState,
     score,
     difficulty,
@@ -148,6 +148,11 @@ export default function App() {
         </div>
         <div className="w-px h-10 bg-emerald-700/50" />
         <div className="text-center">
+          <p className="text-[10px] text-emerald-300/70 uppercase tracking-wider font-semibold">🎯 On Board</p>
+          <p className="text-2xl md:text-3xl font-bold text-emerald-300 tabular-nums leading-tight">{carrots.length}</p>
+        </div>
+        <div className="w-px h-10 bg-emerald-700/50" />
+        <div className="text-center">
           <p className="text-[10px] text-emerald-300/70 uppercase tracking-wider font-semibold">🏆 Best</p>
           <p className="text-2xl md:text-3xl font-bold text-yellow-400 tabular-nums leading-tight">{highScore}</p>
         </div>
@@ -162,7 +167,7 @@ export default function App() {
       >
         <GameBoard
           rabbit={rabbit}
-          carrot={carrot}
+          carrots={carrots}
           gridSize={gridSize}
           gameState={gameState}
           score={score}
