@@ -6,8 +6,8 @@ import TouchControls from './components/TouchControls';
 
 export default function App() {
   const {
-    rabbit,
-    carrots,
+    snake,
+    food,
     gameState,
     score,
     difficulty,
@@ -175,22 +175,22 @@ export default function App() {
     <div className="min-h-screen bg-gradient-to-br from-emerald-950 via-green-950 to-emerald-950 text-white flex flex-col items-center p-4 py-6 select-none overflow-x-hidden">
       {/* Header */}
       <div className="text-center mb-3">
-        <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-amber-300 to-orange-400 bg-clip-text text-transparent">
-          🐰 Rabbit Game
+        <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">
+          🐍 Snake Game
         </h1>
-        <p className="text-emerald-300/70 text-xs md:text-sm mt-1">Move your mouse to guide the rabbit!</p>
+        <p className="text-emerald-300/70 text-xs md:text-sm mt-1">Hunt mice in the forest!</p>
       </div>
 
       {/* Score Panel */}
       <div className="flex items-center gap-6 mb-3 bg-emerald-900/40 rounded-xl px-6 py-3 border border-emerald-700/40">
         <div className="text-center">
-          <p className="text-[10px] text-emerald-300/70 uppercase tracking-wider font-semibold">🥕 Carrots</p>
+          <p className="text-[10px] text-emerald-300/70 uppercase tracking-wider font-semibold">🐭 Mice</p>
           <p className="text-2xl md:text-3xl font-bold text-orange-400 tabular-nums leading-tight">{score}</p>
         </div>
         <div className="w-px h-10 bg-emerald-700/50" />
         <div className="text-center">
           <p className="text-[10px] text-emerald-300/70 uppercase tracking-wider font-semibold">🎯 On Board</p>
-          <p className="text-2xl md:text-3xl font-bold text-emerald-300 tabular-nums leading-tight">{carrots.length}</p>
+          <p className="text-2xl md:text-3xl font-bold text-emerald-300 tabular-nums leading-tight">{food.length}</p>
         </div>
         <div className="w-px h-10 bg-emerald-700/50" />
         <div className="text-center">
@@ -208,8 +208,8 @@ export default function App() {
         onTouchMove={handleTouchMove}
       >
         <GameBoard
-          rabbit={rabbit}
-          carrots={carrots}
+          snake={snake}
+          food={food}
           gridSize={gridSize}
           gameState={gameState}
           score={score}
@@ -376,7 +376,7 @@ export default function App() {
 
       {/* Footer */}
       <p className="text-emerald-700/60 text-[10px] mt-4 text-center">
-        Move mouse, tilt phone, or use buttons to guide the rabbit • 🐰 loves 🥕
+        Move mouse, tilt phone, or use buttons to guide the snake • 🐍 hunts 🐭
       </p>
     </div>
   );

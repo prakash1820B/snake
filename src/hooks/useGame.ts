@@ -65,18 +65,20 @@ function getRandomPositionInCircle(exclude: Position[], minDistance: number = 1)
   return pos;
 }
 
-function generateCarrots(rabbit: Position[], count: number): Position[] {
-  const carrots: Position[] = [];
+function generateFood(snake: Position[], count: number): Position[] {
+  const food: Position[] = [];
   for (let i = 0; i < count; i++) {
-    const exclude = [...rabbit, ...carrots];
-    carrots.push(getRandomPositionInCircle(exclude, 1.5));
+    const exclude = [...snake, ...food];
+    food.push(getRandomPositionInCircle(exclude, 1.5));
   }
-  return carrots;
+  return food;
 }
 
-const INITIAL_RABBIT: Position[] = [
+const INITIAL_SNAKE: Position[] = [
   { x: 10, y: 10 },
+  { x: 9.5, y: 10 },
   { x: 9, y: 10 },
+  { x: 8.5, y: 10 },
   { x: 8, y: 10 },
 ];
 
@@ -86,14 +88,14 @@ interface Velocity {
 }
 
 export function useGame() {
-  const [rabbit, setRabbit] = useState<Position[]>(INITIAL_RABBIT);
-  const [carrots, setCarrots] = useState<Position[]>(() => generateCarrots(INITIAL_RABBIT, 3));
+  const [snake, setSnake] = useState<Position[]>(INITIAL_SNAKE);
+  const [food, setFood] = useState<Position[]>(() => generateFood(INITIAL_SNAKE, 3));
   const [gameState, setGameState] = useState<GameState>('idle');
   const [score, setScore] = useState(0);
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
   const [highScore, setHighScore] = useState<number>(() => {
     try {
-      const saved = localStorage.getItem('rabbit-high-score');
+      const saved = localStorage.getItem('snake-high-score');
       return saved ? parseInt(saved, 10) || 0 : 0;
     } catch {
       return 0;
@@ -102,12 +104,13 @@ export function useGame() {
 
   const velocityRef = useRef<Velocity>({ x: 0.12, y: 0 });
   const targetVelocityRef = useRef<Velocity>({ x: 0.12, y: 0 });
-  const carrotsRef = useRef<Position[]>(carrots);
+  const foodRef = useRef<Position[]>(food);
   const scoreRef = useRef(0);
   const difficultyRef = useRef<Difficulty>('medium');
   const gameStateRef = useRef<GameState>('idle');
+  const timeRef = useRef(0);
 
-  useEffect(() => { carrotsRef.current = carrots; }, [carrots]);
+  useEffect(() => { foodRef.current = food; }, [food]);
   useEffect(() => { scoreRef.current = score; }, [score]);
   useEffect(() => { difficultyRef.current = difficulty; }, [difficulty]);
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
@@ -116,7 +119,7 @@ export function useGame() {
     setHighScore(prev => {
       const newHigh = Math.max(prev, finalScore);
       try {
-        localStorage.setItem('rabbit-high-score', String(newHigh));
+        localStorage.setItem('snake-high-score', String(newHigh));
       } catch { /* ignore */ }
       return newHigh;
     });
@@ -128,12 +131,12 @@ export function useGame() {
   }, [saveHighScore]);
 
   const resetGame = useCallback(() => {
-    const initialRabbit = [...INITIAL_RABBIT];
-    setRabbit(initialRabbit);
+    const initialSnake = [...INITIAL_SNAKE];
+    setSnake(initialSnake);
     const count = Math.floor(Math.random() * 5) + 1;
-    const newCarrots = generateCarrots(initialRabbit, count);
-    setCarrots(newCarrots);
-    carrotsRef.current = newCarrots;
+    const newFood = generateFood(initialSnake, count);
+    setFood(newFood);
+    foodRef.current = newFood;
     velocityRef.current = { x: 0.12, y: 0 };
     targetVelocityRef.current = { x: 0.12, y: 0 };
     setScore(0);
@@ -143,12 +146,12 @@ export function useGame() {
 
   const startGame = useCallback(() => {
     if (gameStateRef.current === 'gameover' || gameStateRef.current === 'idle') {
-      const initialRabbit = [...INITIAL_RABBIT];
-      setRabbit(initialRabbit);
+      const initialSnake = [...INITIAL_SNAKE];
+      setSnake(initialSnake);
       const count = Math.floor(Math.random() * 5) + 1;
-      const newCarrots = generateCarrots(initialRabbit, count);
-      setCarrots(newCarrots);
-      carrotsRef.current = newCarrots;
+      const newFood = generateFood(initialSnake, count);
+      setFood(newFood);
+      foodRef.current = newFood;
       velocityRef.current = { x: 0.12, y: 0 };
       targetVelocityRef.current = { x: 0.12, y: 0 };
       setScore(0);
@@ -208,8 +211,9 @@ export function useGame() {
     let lastTime = performance.now();
 
     const tick = (currentTime: number) => {
-      const deltaTime = (currentTime - lastTime) / 16; // normalize to 60fps
+      const deltaTime = (currentTime - lastTime) / 16;
       lastTime = currentTime;
+      timeRef.current += deltaTime * 0.1;
 
       // Smooth velocity interpolation
       const lerpFactor = 0.15 * deltaTime;
@@ -218,8 +222,8 @@ export function useGame() {
         y: velocityRef.current.y + (targetVelocityRef.current.y - velocityRef.current.y) * lerpFactor,
       };
 
-      setRabbit(prevRabbit => {
-        const head = { ...prevRabbit[0] };
+      setSnake(prevSnake => {
+        const head = { ...prevSnake[0] };
         
         // Apply velocity
         head.x += velocityRef.current.x * deltaTime;
@@ -233,33 +237,33 @@ export function useGame() {
         }
 
         // Self collision
-        const bodyToCheck = prevRabbit.slice(0, -1);
+        const bodyToCheck = prevSnake.slice(0, -1);
         if (bodyToCheck.some(s => {
           const dx = s.x - head.x;
           const dy = s.y - head.y;
           return Math.sqrt(dx * dx + dy * dy) < 0.5;
         })) {
           endGame();
-          return prevRabbit;
+          return prevSnake;
         }
 
-        const newRabbit = [head, ...prevRabbit];
-        const currentCarrots = carrotsRef.current;
+        const newSnake = [head, ...prevSnake];
+        const currentFood = foodRef.current;
 
-        // Check carrot collision
-        const eatenIndex = currentCarrots.findIndex(c => {
-          const dx = c.x - head.x;
-          const dy = c.y - head.y;
+        // Check food collision
+        const eatenIndex = currentFood.findIndex(f => {
+          const dx = f.x - head.x;
+          const dy = f.y - head.y;
           return Math.sqrt(dx * dx + dy * dy) < 0.8;
         });
 
         if (eatenIndex !== -1) {
-          const newCarrots = currentCarrots.filter((_, i) => i !== eatenIndex);
-          const newCarrot = getRandomPositionInCircle([...newRabbit, ...newCarrots], 1.5);
-          newCarrots.push(newCarrot);
+          const newFood = currentFood.filter((_, i) => i !== eatenIndex);
+          const newFoodItem = getRandomPositionInCircle([...newSnake, ...newFood], 1.5);
+          newFood.push(newFoodItem);
 
-          setCarrots(newCarrots);
-          carrotsRef.current = newCarrots;
+          setFood(newFood);
+          foodRef.current = newFood;
 
           const points = POINTS_MAP[difficultyRef.current];
           setScore(prev => {
@@ -268,11 +272,11 @@ export function useGame() {
             return newScore;
           });
 
-          return newRabbit;
+          return newSnake;
         }
 
-        newRabbit.pop();
-        return newRabbit;
+        newSnake.pop();
+        return newSnake;
       });
 
       animationFrameId = requestAnimationFrame(tick);
@@ -283,8 +287,8 @@ export function useGame() {
   }, [gameState, endGame]);
 
   return {
-    rabbit,
-    carrots,
+    snake,
+    food,
     gameState,
     score,
     difficulty,

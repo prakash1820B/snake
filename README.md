@@ -1,116 +1,82 @@
-# 🐰 Rabbit Game
+# 🐍 Snake Game - Forest Hunt
 
-> A modern, responsive Rabbit & Carrot game built with **React**, **TypeScript**, **Vite**, and **Tailwind CSS**. Help the hungry rabbit collect carrots in a beautiful circular garden!
+A modern, realistic snake game with physics-based movement, set in a beautiful forest environment. Guide the snake to hunt mice using smooth, fluid controls!
 
-[![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=white)](https://react.dev)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
-[![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+![Snake Game](https://img.shields.io/badge/React-18.3-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue) ![Tailwind](https://img.shields.io/badge/Tailwind-4.0-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
-## ✨ Features
+## 🎮 Gameplay Features
 
-| Feature | Description |
-|---------|-------------|
-| 🐰 **Cute Rabbit** | Adorable rabbit character with ears, eyes, and fluffy body |
-| 🥕 **Tasty Carrots** | Collect delicious carrots to grow your rabbit's tail |
-| 🎯 **Physics Movement** | Smooth, fluid motion in any direction (360°) with velocity-based physics |
-| 🖱️ **Mouse Control** | Move mouse over the circular board to guide the rabbit |
-| 📱 **Tilt Control** | Tilt your phone to guide the rabbit - intuitive mobile control! |
-| 🔄 **Circular Wrap** | Rabbit wraps through the circle boundary - exits one side, appears on opposite! |
-| 🎮 **Keyboard Controls** | Arrow keys or WASD to move, Space to start/pause, R to reset, F for fullscreen |
-| 📱 **Touch Controls** | Swipe gestures on game board + on-screen D-pad for all devices |
-| 🖥️ **Fullscreen Mode** | Immersive fullscreen gameplay with F key or button |
-| ⏸ **Pause & Restart** | Full game state management (idle, playing, paused, game over) |
-| 🎯 **3 Difficulty Levels** | Easy, Medium, Hard — different speeds & scoring |
-| 🏆 **High Score Tracking** | Best score persisted via `localStorage` |
-| 🔴 **Circular Board** | Round game board with circular boundary and wrap-around edges |
-| 🥕 **Multiple Carrots** | 1-5 random carrots on the board at once - eat one, a new one spawns! |
-| 🌿 **Garden Theme** | Beautiful green garden background with grass details |
-| ✨ **Modern UI** | Dark theme, gradients, smooth animations, glass-morphism overlays |
-| 📐 **Fully Responsive** | Optimized for desktop and mobile screens |
-| 🚀 **Lightweight** | Fast load times, zero heavy dependencies |
-| 🛡 **Type-Safe** | Built entirely with TypeScript |
+### 🐍 Realistic Snake Movement
+- **Physics-Based Crawling**: Smooth, fluid motion with velocity interpolation
+- **360° Movement**: Move in any direction, not just 4 cardinal directions
+- **Continuous Positions**: Floating-point coordinates for organic, natural movement
+- **Wrap-Around**: Exit one side of the forest, appear on the opposite side
+- **No Grid Snapping**: Snake glides smoothly without jerky grid-based movement
 
-## 🎮 How to Play
+### 🌲 Forest Environment
+- **Immersive Background**: Dark green forest floor with scattered leaves
+- **Realistic Snake**: Green scales pattern with forked tongue and yellow eyes
+- **Prey (Mice)**: Gray mice with ears, eyes, and tails scattered in the forest
+- **Circular Arena**: Play in a circular forest clearing with subtle boundary
+- **Atmospheric Lighting**: Radial gradients create depth and mood
 
-1. Press **Start Game** or **Space** to begin
-2. **Move your mouse** over the circular board to guide the rabbit 🐰
-3. The rabbit will follow your mouse cursor - just hover in the direction you want to go!
-4. Collect carrots 🥕 to grow longer and earn points
-5. **Multiple carrots** (1-5) appear on the board at once - eat one and a new one spawns!
-6. The rabbit **wraps around** the circular boundary - exit one side, appear on the opposite!
-7. Avoid hitting your own body
-8. Try to beat your high score! 🏆
+### 🎯 Game Mechanics
+- **Multiple Prey**: 1-5 mice appear at once, new ones spawn when caught
+- **Score System**: Earn points based on difficulty (Easy: 5, Medium: 10, Hard: 20)
+- **Growth**: Snake grows longer with each mouse caught
+- **Self-Collision**: Game ends if snake hits its own body
+- **High Score**: Persistent high score tracking via localStorage
 
-## 🕹 Controls
+## 🕹️ Controls
 
-### Mouse Control (Desktop)
+### 🖱️ Mouse Control (Primary)
+- **Move mouse** over the circular game board to guide the snake
+- Snake follows your cursor with smooth physics-based movement
+- Works on desktop browsers
 
-- **Move mouse** over the circular game board to guide the rabbit
-- The rabbit follows your cursor - just hover in the direction you want to go!
-
-### Tilt Control (Mobile)
-
-- **Tilt your phone** to guide the rabbit
-- Tilt forward → rabbit moves up
-- Tilt backward → rabbit moves down
-- Tilt left → rabbit moves left
-- Tilt right → rabbit moves right
+### 📱 Tilt Control (Mobile)
+- **Tilt your phone** to guide the snake
+- Tilt forward/backward/left/right to change direction
 - Click "Enable Tilt Control" button to activate
-- Works on iOS and Android (permission required on iOS)
+- Uses Device Orientation API with iOS permission handling
 
-### Touch Controls (Mobile)
+### ⌨️ Keyboard Controls
+- **Arrow Keys** or **WASD**: Move snake in 4 directions
+- **Space**: Start game / Pause / Resume
+- **P**: Pause / Resume
+- **R**: Reset game
+- **F**: Toggle fullscreen
 
-- **Touch and drag** on the game board to guide the rabbit
-- The rabbit follows your finger movement
-- **On-screen D-pad** buttons below the game board
-- Tap buttons to Start, Pause, or Reset
+### 👆 Touch Controls
+- **Swipe** on game board to change direction
+- **D-Pad buttons** below the game board for precise control
+- Works on all touch devices
 
-### Keyboard (Fallback)
+## 🎚️ Difficulty Levels
 
-| Key | Action |
-|-----|--------|
-| `↑` `↓` `←` `→` or `W` `A` `S` `D` | Move rabbit |
-| `Space` | Start / Pause / Resume |
-| `P` | Pause / Resume |
-| `R` | Reset game |
-| `F` | Toggle fullscreen |
-
-## 🎚 Difficulty Levels
-
-| Level | Emoji | Speed | Points per Carrot |
-|-------|-------|-------|-------------------|
-| Easy | 🟢 | Slow (180ms) | 5 |
-| Medium | 🟡 | Normal (120ms) | 10 |
-| Hard | 🔴 | Fast (70ms) | 20 |
-
-## 🛠 Tech Stack
-
-- **React 18** — UI framework with hooks
-- **TypeScript** — Type safety throughout
-- **Vite** — Lightning-fast build tool
-- **Tailwind CSS 4** — Utility-first styling
-- **Custom Hooks** — Clean game logic separation
+| Level | Speed | Points per Mouse | Description |
+|-------|-------|------------------|-------------|
+| 🟢 Easy | Slow | 5 | Relaxed hunting, perfect for beginners |
+| 🟡 Medium | Normal | 10 | Balanced challenge |
+| 🔴 Hard | Fast | 20 | Intense hunting, expert level |
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-
-- [Node.js](https://nodejs.org/) 18+ installed
-- npm or yarn
+- Node.js 18+ installed
+- npm or yarn package manager
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/rabbit-game.git
-cd rabbit-game
+git clone https://github.com/yourusername/snake-game.git
+cd snake-game
 
 # Install dependencies
 npm install
 
-# Start development server (http://localhost:3000)
+# Start development server
 npm run dev
 
 # Build for production
@@ -123,88 +89,106 @@ npm run preview
 ## 📁 Project Structure
 
 ```
-rabbit-game/
-├── public/                     # Static assets
+snake-game/
 ├── src/
 │   ├── components/
-│   │   ├── GameBoard.tsx       # Game board rendering (rabbit, carrot, overlays)
+│   │   ├── GameBoard.tsx       # Circular forest arena with snake and mice
 │   │   └── TouchControls.tsx   # Mobile D-pad controls
 │   ├── hooks/
-│   │   └── useGame.ts          # Core game logic (state, loop, collisions)
-│   ├── App.tsx                 # Main app component (layout, controls)
+│   │   ├── useGame.ts          # Core game logic with physics
+│   │   └── useDeviceOrientation.ts  # Mobile tilt controls
+│   ├── App.tsx                 # Main app component
 │   ├── main.tsx                # React entry point
-│   └── index.css               # Global styles + Tailwind
+│   └── index.css               # Global styles
 ├── index.html                  # HTML template
-├── vite.config.js              # Vite configuration
-├── tsconfig.json               # TypeScript configuration
-├── package.json                # Dependencies & scripts
+├── README.md                   # This file
 ├── LICENSE                     # MIT License
-└── README.md                   # This file
+└── package.json                # Dependencies
 ```
 
-## 🧠 Implementation Highlights
+## 🧠 Technical Implementation
 
 ### Physics & Movement
-- **Velocity-Based Physics** — Rabbit uses velocity vectors (vx, vy) with smooth interpolation (lerp factor 0.15)
-- **Continuous Positions** — Floating-point coordinates instead of grid-snapping for organic movement
-- **360° Movement** — Can move in any direction, not just 4 cardinal directions
-- **requestAnimationFrame** — Smooth 60fps game loop with delta time normalization
-- **Distance-Based Collision** — Circle collision detection using distance formula
+- **Velocity-Based Physics**: Snake uses velocity vectors (vx, vy) with smooth interpolation (lerp factor 0.15)
+- **Continuous Positions**: Floating-point coordinates instead of grid-snapping for organic movement
+- **360° Movement**: Can move in any direction, not just 4 cardinal directions
+- **requestAnimationFrame**: Smooth 60fps game loop with delta time normalization
+- **Distance-Based Collision**: Circle collision detection using distance formula
 
 ### Game Mechanics
-- **Circular Wrap-Around** — When rabbit exits the circle, it reappears on the opposite side using angle-based reflection
-- **Multiple Carrots** — Random 1-5 carrots spawn at game start, new carrot spawns when one is eaten
-- **Self-collision Detection** — Distance-based check (0.5 units) to prevent false positives
-- **Carrot Eating Radius** — Carrots eaten when rabbit gets within 0.8 units
+- **Circular Wrap-Around**: When snake exits the circle, it reappears on the opposite side using angle-based reflection
+- **Multiple Mice**: Random 1-5 mice spawn at game start, new mouse spawns when one is caught
+- **Self-collision Detection**: Distance-based check (0.5 units) to prevent false positives
+- **Mouse Catching Radius**: Mice caught when snake gets within 0.8 units
 
 ### Controls
-- **Mouse Control** — Rabbit follows mouse cursor position using normalized direction vectors
-- **Tilt Control** — Device orientation API maps phone tilt (beta/gamma) to velocity changes with 15° threshold
-- **iOS Permission Handling** — Properly requests DeviceOrientation permission on iOS 13+ devices
-- **Touch Controls** — Swipe gestures and D-pad buttons for mobile devices
+- **Mouse Control**: Snake follows mouse cursor position using normalized direction vectors
+- **Tilt Control**: Device orientation API maps phone tilt (beta/gamma) to velocity changes with 15° threshold
+- **iOS Permission Handling**: Properly requests DeviceOrientation permission on iOS 13+ devices
+- **Touch Controls**: Swipe gestures and D-pad buttons for mobile devices
 
-### Technical
-- **Ref-based Game Loop** — Uses refs for carrots/score/velocity to avoid stale closures
-- **Efficient Rendering** — Uses stable keys for rabbit segments, minimal re-renders
-- **localStorage Persistence** — High score survives page refreshes
-- **Pure CSS Graphics** — Rabbit and carrots drawn with CSS (no images needed)
-- **Radial Gradient Background** — Beautiful circular gradient for the game board
-- **Responsive Design** — Game board scales to `min(90vw, 90vh, 600px)` for optimal viewing
+### Technical Features
+- **Ref-based Game Loop**: Uses refs for mice/score/velocity to avoid stale closures
+- **Efficient Rendering**: Uses stable keys for snake segments, minimal re-renders
+- **localStorage Persistence**: High score survives page refreshes
+- **Pure CSS Graphics**: Snake and mice drawn with CSS (no images needed)
+- **Radial Gradient Background**: Beautiful forest atmosphere
+- **Responsive Design**: Game board scales to `min(90vw, 90vh, 600px)` for optimal viewing
+- **Fullscreen Support**: Cross-browser fullscreen API with webkit/ms prefixes
 
 ## 🎨 Visual Design
 
-- **Circular Board**: Round game board with emerald green border and radial gradient background
-- **Clean Background**: Dark green garden theme without grid lines for smooth visual experience
-- **Rabbit**: Cute white/cream character with pink ears, black eyes, and pink nose
-- **Carrots**: Multiple orange triangular carrots with green leaves, each with staggered pulse animations
+### Forest Environment
+- **Circular Arena**: Round game board with emerald green border and dark forest gradient
+- **Forest Floor**: Dark green background with scattered leaf patterns
+- **Atmospheric Lighting**: Radial gradients create depth and natural lighting
+- **Clean Background**: No grid lines for smooth, immersive visual experience
+
+### Snake Design
+- **Realistic Appearance**: Green gradient body with scale patterns
+- **Detailed Head**: Yellow eyes with black pupils, forked red tongue
+- **Body Segments**: Gradient coloring that darkens toward the tail
 - **Smooth Movement**: Physics-based interpolation creates fluid, organic motion
-- **Animations**: Smooth pulsing carrots with staggered delays, gradient effects, glass-morphism overlays
-- **Boundary Indicator**: Subtle inner ring showing the circular play area
+- **Opacity Fade**: Tail segments fade out for depth effect
+
+### Mice (Prey)
+- **Cute Design**: Gray mice with rounded bodies
+- **Details**: Ears, eyes, and tails for realistic appearance
+- **Pulsing Animation**: Subtle pulse effect to attract attention
+- **Scattered Placement**: Randomly positioned throughout the forest
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome!
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+Contributions are welcome! Feel free to:
+- Report bugs
+- Suggest new features
+- Submit pull requests
+- Improve documentation
 
 ## 📄 License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
-- Inspired by classic arcade games
-- Built with modern web technologies for a smooth, responsive experience
-- Pure CSS graphics - no images required!
+- Inspired by classic Snake arcade games
+- Built with modern web technologies for smooth, responsive gameplay
+- Physics-based movement for realistic snake behavior
+- Beautiful forest environment for immersive experience
+
+## 🎯 Future Enhancements
+
+- [ ] Sound effects (hissing, mouse squeaks)
+- [ ] Multiple snake skins
+- [ ] Power-ups and special mice
+- [ ] Leaderboard system
+- [ ] Multiplayer mode
+- [ ] More forest environments (night, winter, etc.)
 
 ---
 
 <div align="center">
   Made with ❤️ using React + TypeScript + Tailwind CSS
   
-  🐰 loves 🥕 • 📱 Tilt to play!
+  🐍 hunts 🐭 in the 🌲 forest!
 </div>
