@@ -1,12 +1,12 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
-import { useSnakeGame, Direction, Difficulty } from './hooks/useSnakeGame';
+import { useGame, Direction, Difficulty } from './hooks/useGame';
 import GameBoard from './components/GameBoard';
 import TouchControls from './components/TouchControls';
 
 export default function App() {
   const {
-    snake,
-    food,
+    rabbit,
+    carrot,
     gameState,
     score,
     difficulty,
@@ -17,7 +17,7 @@ export default function App() {
     togglePause,
     changeDirection,
     setDifficulty,
-  } = useSnakeGame();
+  } = useGame();
 
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
@@ -131,24 +131,24 @@ export default function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white flex flex-col items-center p-4 py-6 select-none overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-950 via-green-950 to-emerald-950 text-white flex flex-col items-center p-4 py-6 select-none overflow-x-hidden">
       {/* Header */}
       <div className="text-center mb-3">
-        <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-          🐍 Snake Game
+        <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-amber-300 to-orange-400 bg-clip-text text-transparent">
+          🐰 Rabbit Game
         </h1>
-        <p className="text-slate-400 text-xs md:text-sm mt-1">Classic arcade fun, modern style</p>
+        <p className="text-emerald-300/70 text-xs md:text-sm mt-1">Help the hungry rabbit collect carrots!</p>
       </div>
 
       {/* Score Panel */}
-      <div className="flex items-center gap-6 mb-3 bg-slate-800/50 rounded-xl px-6 py-3 border border-slate-700/50">
+      <div className="flex items-center gap-6 mb-3 bg-emerald-900/40 rounded-xl px-6 py-3 border border-emerald-700/40">
         <div className="text-center">
-          <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Score</p>
-          <p className="text-2xl md:text-3xl font-bold text-emerald-400 tabular-nums leading-tight">{score}</p>
+          <p className="text-[10px] text-emerald-300/70 uppercase tracking-wider font-semibold">🥕 Carrots</p>
+          <p className="text-2xl md:text-3xl font-bold text-orange-400 tabular-nums leading-tight">{score}</p>
         </div>
-        <div className="w-px h-10 bg-slate-700" />
+        <div className="w-px h-10 bg-emerald-700/50" />
         <div className="text-center">
-          <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Best</p>
+          <p className="text-[10px] text-emerald-300/70 uppercase tracking-wider font-semibold">🏆 Best</p>
           <p className="text-2xl md:text-3xl font-bold text-yellow-400 tabular-nums leading-tight">{highScore}</p>
         </div>
       </div>
@@ -161,8 +161,8 @@ export default function App() {
         onTouchEnd={handleTouchEnd}
       >
         <GameBoard
-          snake={snake}
-          food={food}
+          rabbit={rabbit}
+          carrot={carrot}
           gridSize={gridSize}
           gameState={gameState}
           score={score}
@@ -174,10 +174,10 @@ export default function App() {
         {(gameState === 'idle' || gameState === 'gameover') && (
           <button
             onClick={startGame}
-            className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold
-              transition-all duration-200 active:scale-95 shadow-lg shadow-emerald-600/30"
+            className="px-5 py-2.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white font-semibold
+              transition-all duration-200 active:scale-95 shadow-lg shadow-orange-600/30"
           >
-            {gameState === 'gameover' ? '🔄 Play Again' : '▶ Start Game'}
+            {gameState === 'gameover' ? '🔄 Try Again' : '▶ Start Game'}
           </button>
         )}
 
@@ -195,15 +195,15 @@ export default function App() {
           <>
             <button
               onClick={togglePause}
-              className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold
-                transition-all duration-200 active:scale-95 shadow-lg shadow-emerald-600/30"
+              className="px-5 py-2.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white font-semibold
+                transition-all duration-200 active:scale-95 shadow-lg shadow-orange-600/30"
             >
               ▶ Resume
             </button>
             <button
               onClick={resetGame}
-              className="px-5 py-2.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-semibold
-                transition-all duration-200 active:scale-95 border border-slate-600"
+              className="px-5 py-2.5 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white font-semibold
+                transition-all duration-200 active:scale-95 border border-emerald-600"
             >
               🔄 Reset
             </button>
@@ -213,8 +213,8 @@ export default function App() {
         {(gameState === 'playing' || gameState === 'gameover') && (
           <button
             onClick={resetGame}
-            className="px-5 py-2.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-semibold
-              transition-all duration-200 active:scale-95 border border-slate-600"
+            className="px-5 py-2.5 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white font-semibold
+              transition-all duration-200 active:scale-95 border border-emerald-600"
           >
             🔄 Reset
           </button>
@@ -223,8 +223,8 @@ export default function App() {
         {/* Fullscreen Button */}
         <button
           onClick={toggleFullscreen}
-          className="px-5 py-2.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-semibold
-            transition-all duration-200 active:scale-95 border border-slate-600"
+          className="px-5 py-2.5 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white font-semibold
+            transition-all duration-200 active:scale-95 border border-emerald-600"
           title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
         >
           {isFullscreen ? '⛶ Exit' : '⛶ Fullscreen'}
@@ -233,8 +233,8 @@ export default function App() {
 
       {/* Difficulty Selector */}
       <div className="flex items-center gap-2 mt-4">
-        <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold mr-1">
-          Difficulty:
+        <span className="text-xs text-emerald-300/70 uppercase tracking-wider font-semibold mr-1">
+          Speed:
         </span>
         {difficulties.map(d => (
           <button
@@ -251,7 +251,7 @@ export default function App() {
               ${
                 difficulty === d.value
                   ? `${d.color} text-white shadow-lg scale-105`
-                  : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700 border border-slate-600/50'
+                  : 'bg-emerald-900/50 text-emerald-200 hover:bg-emerald-800/60 border border-emerald-700/50'
               }`}
           >
             {d.emoji} {d.label}
@@ -259,39 +259,39 @@ export default function App() {
         ))}
       </div>
 
-      {/* Touch Controls (Mobile only) */}
+      {/* Touch Controls (All devices) */}
       <TouchControls
         onDirection={changeDirection}
         disabled={gameState !== 'playing'}
       />
 
       {/* Keyboard hints (Desktop only) */}
-      <div className="hidden md:flex flex-wrap items-center justify-center gap-3 mt-4 text-xs text-slate-500">
+      <div className="hidden md:flex flex-wrap items-center justify-center gap-3 mt-4 text-xs text-emerald-400/60">
         <span className="flex items-center gap-1">
-          <kbd className="px-1.5 py-0.5 rounded bg-slate-700/80 text-slate-300 text-[10px] font-mono border border-slate-600">↑↓←→</kbd>
+          <kbd className="px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-200 text-[10px] font-mono border border-emerald-700/50">↑↓←→</kbd>
           <span>Move</span>
         </span>
         <span className="flex items-center gap-1">
-          <kbd className="px-1.5 py-0.5 rounded bg-slate-700/80 text-slate-300 text-[10px] font-mono border border-slate-600">Space</kbd>
+          <kbd className="px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-200 text-[10px] font-mono border border-emerald-700/50">Space</kbd>
           <span>Start / Pause</span>
         </span>
         <span className="flex items-center gap-1">
-          <kbd className="px-1.5 py-0.5 rounded bg-slate-700/80 text-slate-300 text-[10px] font-mono border border-slate-600">P</kbd>
+          <kbd className="px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-200 text-[10px] font-mono border border-emerald-700/50">P</kbd>
           <span>Pause</span>
         </span>
         <span className="flex items-center gap-1">
-          <kbd className="px-1.5 py-0.5 rounded bg-slate-700/80 text-slate-300 text-[10px] font-mono border border-slate-600">R</kbd>
+          <kbd className="px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-200 text-[10px] font-mono border border-emerald-700/50">R</kbd>
           <span>Reset</span>
         </span>
         <span className="flex items-center gap-1">
-          <kbd className="px-1.5 py-0.5 rounded bg-slate-700/80 text-slate-300 text-[10px] font-mono border border-slate-600">F</kbd>
+          <kbd className="px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-200 text-[10px] font-mono border border-emerald-700/50">F</kbd>
           <span>Fullscreen</span>
         </span>
       </div>
 
       {/* Footer */}
-      <p className="text-slate-600 text-[10px] mt-4 text-center">
-        Swipe or use arrow keys • Press F for fullscreen • Built with React + TypeScript
+      <p className="text-emerald-700/60 text-[10px] mt-4 text-center">
+        Swipe or use arrow keys • Press F for fullscreen • 🐰 loves 🥕
       </p>
     </div>
   );

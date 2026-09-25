@@ -1,6 +1,6 @@
-# 🐍 Snake Game
+# 🐰 Rabbit Game
 
-> A modern, responsive Snake web game built with **React**, **TypeScript**, **Vite**, and **Tailwind CSS**.
+> A modern, responsive Rabbit & Carrot game built with **React**, **TypeScript**, **Vite**, and **Tailwind CSS**. Help the hungry rabbit collect carrots in a beautiful garden setting!
 
 [![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=white)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
@@ -12,13 +12,16 @@
 
 | Feature | Description |
 |---------|-------------|
+| 🐰 **Cute Rabbit** | Adorable rabbit character with ears, eyes, and fluffy body |
+| 🥕 **Tasty Carrots** | Collect delicious carrots to grow your rabbit's tail |
 | 🎮 **Keyboard Controls** | Arrow keys or WASD to move, Space to start/pause, R to reset, F for fullscreen |
 | 📱 **Touch Controls** | Swipe gestures on game board + on-screen D-pad for all devices |
 | 🖥️ **Fullscreen Mode** | Immersive fullscreen gameplay with F key or button |
 | ⏸ **Pause & Restart** | Full game state management (idle, playing, paused, game over) |
 | 🎯 **3 Difficulty Levels** | Easy, Medium, Hard — different speeds & scoring |
 | 🏆 **High Score Tracking** | Best score persisted via `localStorage` |
-| 🔄 **Wrap-Around Edges** | Snake passes through walls and appears on the opposite side |
+| 🔄 **Wrap-Around Edges** | Rabbit passes through walls and appears on the opposite side |
+| 🌿 **Garden Theme** | Beautiful green garden background with grass details |
 | ✨ **Modern UI** | Dark theme, gradients, smooth animations, glass-morphism overlays |
 | 📐 **Fully Responsive** | Optimized for desktop and mobile screens |
 | 🚀 **Lightweight** | Fast load times, zero heavy dependencies |
@@ -27,9 +30,9 @@
 ## 🎮 How to Play
 
 1. Press **Start Game** or **Space** to begin
-2. Guide the snake 🐍 to eat the red food 🔴
-3. The snake grows longer with each food eaten
-4. The snake **wraps around edges** — go off one side, appear on the other!
+2. Guide the rabbit 🐰 to eat the carrots 🥕
+3. The rabbit grows longer with each carrot eaten
+4. The rabbit **wraps around edges** — go off one side, appear on the other!
 5. Avoid hitting your own body
 6. Try to beat your high score! 🏆
 
@@ -39,7 +42,7 @@
 
 | Key | Action |
 |-----|--------|
-| `↑` `↓` `←` `→` or `W` `A` `S` `D` | Move snake |
+| `↑` `↓` `←` `→` or `W` `A` `S` `D` | Move rabbit |
 | `Space` | Start / Pause / Resume |
 | `P` | Pause / Resume |
 | `R` | Reset game |
@@ -54,8 +57,8 @@
 
 ## 🎚 Difficulty Levels
 
-| Level | Emoji | Speed | Points per Food |
-|-------|-------|-------|-----------------|
+| Level | Emoji | Speed | Points per Carrot |
+|-------|-------|-------|-------------------|
 | Easy | 🟢 | Slow (180ms) | 5 |
 | Medium | 🟡 | Normal (120ms) | 10 |
 | Hard | 🔴 | Fast (70ms) | 20 |
@@ -79,8 +82,8 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/snake-game.git
-cd snake-game
+git clone https://github.com/YOUR_USERNAME/rabbit-game.git
+cd rabbit-game
 
 # Install dependencies
 npm install
@@ -98,14 +101,14 @@ npm run preview
 ## 📁 Project Structure
 
 ```
-snake-game/
+rabbit-game/
 ├── public/                     # Static assets
 ├── src/
 │   ├── components/
-│   │   ├── GameBoard.tsx       # Game board rendering (snake, food, overlays)
+│   │   ├── GameBoard.tsx       # Game board rendering (rabbit, carrot, overlays)
 │   │   └── TouchControls.tsx   # Mobile D-pad controls
 │   ├── hooks/
-│   │   └── useSnakeGame.ts     # Core game logic (state, loop, collisions)
+│   │   └── useGame.ts          # Core game logic (state, loop, collisions)
 │   ├── App.tsx                 # Main app component (layout, controls)
 │   ├── main.tsx                # React entry point
 │   └── index.css               # Global styles + Tailwind
@@ -119,12 +122,20 @@ snake-game/
 
 ## 🧠 Implementation Highlights
 
-- **Wrap-Around Edges** — Toroidal grid where the snake passes through walls and appears on the opposite side
-- **Direction Queue** — Prevents rapid key presses from causing the snake to reverse into itself
-- **Ref-based Game Loop** — Uses refs for food/score/direction to avoid stale closures in `setInterval`
-- **Efficient Rendering** — Uses stable keys for snake segments, minimal re-renders
+- **Wrap-Around Edges** — Toroidal grid where the rabbit passes through walls and appears on the opposite side
+- **Direction Queue** — Prevents rapid key presses from causing the rabbit to reverse into itself
+- **Ref-based Game Loop** — Uses refs for carrot/score/direction to avoid stale closures in `setInterval`
+- **Efficient Rendering** — Uses stable keys for rabbit segments, minimal re-renders
 - **Self-collision Optimization** — Excludes tail from collision check (since it moves away)
 - **localStorage Persistence** — High score survives page refreshes
+- **Pure CSS Graphics** — Rabbit and carrot drawn with CSS (no images needed)
+
+## 🎨 Visual Design
+
+- **Rabbit**: Cute white/cream character with pink ears, black eyes, and pink nose
+- **Carrot**: Orange triangular carrot with green leaves on top
+- **Background**: Dark green garden theme with subtle grass patterns
+- **Animations**: Smooth pulsing carrot, gradient effects, glass-morphism overlays
 
 ## 🤝 Contributing
 
@@ -142,11 +153,14 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 ## 🙏 Acknowledgments
 
-- Inspired by the classic 1976 Snake arcade game
+- Inspired by classic arcade games
 - Built with modern web technologies for a smooth, responsive experience
+- Pure CSS graphics - no images required!
 
 ---
 
 <div align="center">
   Made with ❤️ using React + TypeScript + Tailwind CSS
+  
+  🐰 loves 🥕
 </div>

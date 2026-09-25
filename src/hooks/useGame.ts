@@ -33,7 +33,7 @@ function getRandomPosition(exclude: Position[]): Position {
   return pos;
 }
 
-const INITIAL_SNAKE: Position[] = [
+const INITIAL_RABBIT: Position[] = [
   { x: 10, y: 10 },
   { x: 9, y: 10 },
   { x: 8, y: 10 },
@@ -46,15 +46,15 @@ const OPPOSITES: Record<Direction, Direction> = {
   RIGHT: 'LEFT',
 };
 
-export function useSnakeGame() {
-  const [snake, setSnake] = useState<Position[]>(INITIAL_SNAKE);
-  const [food, setFood] = useState<Position>({ x: 15, y: 10 });
+export function useGame() {
+  const [rabbit, setRabbit] = useState<Position[]>(INITIAL_RABBIT);
+  const [carrot, setCarrot] = useState<Position>({ x: 15, y: 10 });
   const [gameState, setGameState] = useState<GameState>('idle');
   const [score, setScore] = useState(0);
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
   const [highScore, setHighScore] = useState<number>(() => {
     try {
-      const saved = localStorage.getItem('snake-high-score');
+      const saved = localStorage.getItem('rabbit-high-score');
       return saved ? parseInt(saved, 10) || 0 : 0;
     } catch {
       return 0;
@@ -64,14 +64,14 @@ export function useSnakeGame() {
   // Refs to avoid stale closures in game loop
   const directionRef = useRef<Direction>('RIGHT');
   const nextDirectionRef = useRef<Direction>('RIGHT');
-  const foodRef = useRef<Position>({ x: 15, y: 10 });
+  const carrotRef = useRef<Position>({ x: 15, y: 10 });
   const scoreRef = useRef(0);
   const difficultyRef = useRef<Difficulty>('medium');
   const gameStateRef = useRef<GameState>('idle');
   const directionQueueRef = useRef<Direction[]>([]);
 
   // Keep refs in sync with state
-  useEffect(() => { foodRef.current = food; }, [food]);
+  useEffect(() => { carrotRef.current = carrot; }, [carrot]);
   useEffect(() => { scoreRef.current = score; }, [score]);
   useEffect(() => { difficultyRef.current = difficulty; }, [difficulty]);
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
@@ -80,7 +80,7 @@ export function useSnakeGame() {
     setHighScore(prev => {
       const newHigh = Math.max(prev, finalScore);
       try {
-        localStorage.setItem('snake-high-score', String(newHigh));
+        localStorage.setItem('rabbit-high-score', String(newHigh));
       } catch { /* ignore */ }
       return newHigh;
     });
@@ -92,11 +92,11 @@ export function useSnakeGame() {
   }, [saveHighScore]);
 
   const resetGame = useCallback(() => {
-    const initialSnake = [...INITIAL_SNAKE];
-    setSnake(initialSnake);
-    const newFood = getRandomPosition(initialSnake);
-    setFood(newFood);
-    foodRef.current = newFood;
+    const initialRabbit = [...INITIAL_RABBIT];
+    setRabbit(initialRabbit);
+    const newCarrot = getRandomPosition(initialRabbit);
+    setCarrot(newCarrot);
+    carrotRef.current = newCarrot;
     directionRef.current = 'RIGHT';
     nextDirectionRef.current = 'RIGHT';
     directionQueueRef.current = [];
@@ -107,11 +107,11 @@ export function useSnakeGame() {
 
   const startGame = useCallback(() => {
     if (gameStateRef.current === 'gameover' || gameStateRef.current === 'idle') {
-      const initialSnake = [...INITIAL_SNAKE];
-      setSnake(initialSnake);
-      const newFood = getRandomPosition(initialSnake);
-      setFood(newFood);
-      foodRef.current = newFood;
+      const initialRabbit = [...INITIAL_RABBIT];
+      setRabbit(initialRabbit);
+      const newCarrot = getRandomPosition(initialRabbit);
+      setCarrot(newCarrot);
+      carrotRef.current = newCarrot;
       directionRef.current = 'RIGHT';
       nextDirectionRef.current = 'RIGHT';
       directionQueueRef.current = [];
@@ -157,8 +157,8 @@ export function useSnakeGame() {
         }
       }
 
-      setSnake(prevSnake => {
-        const head = { ...prevSnake[0] };
+      setRabbit(prevRabbit => {
+        const head = { ...prevRabbit[0] };
         const dir = directionRef.current;
 
         switch (dir) {
@@ -175,31 +175,31 @@ export function useSnakeGame() {
         else if (head.y >= GRID_SIZE) head.y = 0;
 
         // Self collision (check against body, excluding tail since it will move)
-        const bodyToCheck = prevSnake.slice(0, -1);
+        const bodyToCheck = prevRabbit.slice(0, -1);
         if (bodyToCheck.some(s => s.x === head.x && s.y === head.y)) {
           endGame();
-          return prevSnake;
+          return prevRabbit;
         }
 
-        const newSnake = [head, ...prevSnake];
-        const currentFood = foodRef.current;
+        const newRabbit = [head, ...prevRabbit];
+        const currentCarrot = carrotRef.current;
 
-        // Food collision
-        if (head.x === currentFood.x && head.y === currentFood.y) {
+        // Carrot collision
+        if (head.x === currentCarrot.x && head.y === currentCarrot.y) {
           const points = POINTS_MAP[difficultyRef.current];
           setScore(prev => {
             const newScore = prev + points;
             scoreRef.current = newScore;
             return newScore;
           });
-          const newFood = getRandomPosition(newSnake);
-          setFood(newFood);
-          foodRef.current = newFood;
-          return newSnake;
+          const newCarrot = getRandomPosition(newRabbit);
+          setCarrot(newCarrot);
+          carrotRef.current = newCarrot;
+          return newRabbit;
         }
 
-        newSnake.pop();
-        return newSnake;
+        newRabbit.pop();
+        return newRabbit;
       });
     };
 
@@ -208,8 +208,8 @@ export function useSnakeGame() {
   }, [gameState, difficulty, endGame]);
 
   return {
-    snake,
-    food,
+    rabbit,
+    carrot,
     gameState,
     score,
     difficulty,

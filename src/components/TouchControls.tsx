@@ -1,4 +1,4 @@
-import { Direction } from '../hooks/useSnakeGame';
+import { Direction } from '../hooks/useGame';
 
 interface TouchControlsProps {
   onDirection: (dir: Direction) => void;
