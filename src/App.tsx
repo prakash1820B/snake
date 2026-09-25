@@ -26,7 +26,24 @@ export default function App() {
     motionSupported,
     currentTilt,
     toggleMotion,
-  } = useDeviceOrientation(changeDirection);
+  } = useDeviceOrientation((dir) => {
+    // Convert discrete direction to continuous velocity
+    const center = gridSize / 2;
+    switch (dir) {
+      case 'UP':
+        setDirectionFromTarget(center, center - 5);
+        break;
+      case 'DOWN':
+        setDirectionFromTarget(center, center + 5);
+        break;
+      case 'LEFT':
+        setDirectionFromTarget(center - 5, center);
+        break;
+      case 'RIGHT':
+        setDirectionFromTarget(center + 5, center);
+        break;
+    }
+  });
 
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
@@ -34,12 +51,23 @@ export default function App() {
 
   // Fullscreen toggle
   const toggleFullscreen = useCallback(() => {
+    const elem = document.documentElement;
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(err => {
-        console.log('Fullscreen error:', err);
-      });
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen().catch(err => {
+          console.log('Fullscreen error:', err);
+        });
+      } else if ((elem as any).webkitRequestFullscreen) {
+        (elem as any).webkitRequestFullscreen();
+      } else if ((elem as any).msRequestFullscreen) {
+        (elem as any).msRequestFullscreen();
+      }
     } else {
-      document.exitFullscreen();
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if ((document as any).webkitExitFullscreen) {
+        (document as any).webkitExitFullscreen();
+      }
     }
   }, []);
 
@@ -66,19 +94,19 @@ export default function App() {
       switch (keyLower) {
         case 'arrowup':
         case 'w':
-          changeDirection('UP');
+          setDirectionFromTarget(gridSize / 2, gridSize / 2 - 5);
           break;
         case 'arrowdown':
         case 's':
-          changeDirection('DOWN');
+          setDirectionFromTarget(gridSize / 2, gridSize / 2 + 5);
           break;
         case 'arrowleft':
         case 'a':
-          changeDirection('LEFT');
+          setDirectionFromTarget(gridSize / 2 - 5, gridSize / 2);
           break;
         case 'arrowright':
         case 'd':
-          changeDirection('RIGHT');
+          setDirectionFromTarget(gridSize / 2 + 5, gridSize / 2);
           break;
         case ' ':
           if (gameState === 'idle' || gameState === 'gameover') {
@@ -174,7 +202,8 @@ export default function App() {
       {/* Game Board with Mouse Control */}
       <div
         ref={boardRef}
-        className="w-full max-w-[500px] cursor-none"
+        className="w-full cursor-none"
+        style={{ maxWidth: 'min(90vw, 90vh, 600px)' }}
         onMouseMove={handleMouseMove}
         onTouchMove={handleTouchMove}
       >
@@ -305,7 +334,23 @@ export default function App() {
 
       {/* Touch Controls (All devices) */}
       <TouchControls
-        onDirection={changeDirection}
+        onDirection={(dir) => {
+          const center = gridSize / 2;
+          switch (dir) {
+            case 'UP':
+              setDirectionFromTarget(center, center - 5);
+              break;
+            case 'DOWN':
+              setDirectionFromTarget(center, center + 5);
+              break;
+            case 'LEFT':
+              setDirectionFromTarget(center - 5, center);
+              break;
+            case 'RIGHT':
+              setDirectionFromTarget(center + 5, center);
+              break;
+          }
+        }}
         disabled={gameState !== 'playing'}
       />
 

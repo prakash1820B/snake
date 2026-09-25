@@ -14,6 +14,7 @@
 |---------|-------------|
 | 🐰 **Cute Rabbit** | Adorable rabbit character with ears, eyes, and fluffy body |
 | 🥕 **Tasty Carrots** | Collect delicious carrots to grow your rabbit's tail |
+| 🎯 **Physics Movement** | Smooth, fluid motion in any direction (360°) with velocity-based physics |
 | 🖱️ **Mouse Control** | Move mouse over the circular board to guide the rabbit |
 | 📱 **Tilt Control** | Tilt your phone to guide the rabbit - intuitive mobile control! |
 | 🔄 **Circular Wrap** | Rabbit wraps through the circle boundary - exits one side, appears on opposite! |
@@ -143,25 +144,40 @@ rabbit-game/
 
 ## 🧠 Implementation Highlights
 
-- **Circular Wrap-Around** — When rabbit exits the circle, it reappears on the opposite side using reflection math
-- **Mouse Control** — Rabbit follows mouse cursor position using coordinate mapping and direction calculation
-- **Tilt Control** — Device orientation API maps phone tilt (beta/gamma) to direction changes with threshold and debounce
-- **iOS Permission Handling** — Properly requests DeviceOrientation permission on iOS 13+ devices
+### Physics & Movement
+- **Velocity-Based Physics** — Rabbit uses velocity vectors (vx, vy) with smooth interpolation (lerp factor 0.15)
+- **Continuous Positions** — Floating-point coordinates instead of grid-snapping for organic movement
+- **360° Movement** — Can move in any direction, not just 4 cardinal directions
+- **requestAnimationFrame** — Smooth 60fps game loop with delta time normalization
+- **Distance-Based Collision** — Circle collision detection using distance formula
+
+### Game Mechanics
+- **Circular Wrap-Around** — When rabbit exits the circle, it reappears on the opposite side using angle-based reflection
 - **Multiple Carrots** — Random 1-5 carrots spawn at game start, new carrot spawns when one is eaten
-- **Direction Queue** — Prevents rapid inputs from causing the rabbit to reverse into itself
-- **Ref-based Game Loop** — Uses refs for carrots/score/direction to avoid stale closures in `setInterval`
+- **Self-collision Detection** — Distance-based check (0.5 units) to prevent false positives
+- **Carrot Eating Radius** — Carrots eaten when rabbit gets within 0.8 units
+
+### Controls
+- **Mouse Control** — Rabbit follows mouse cursor position using normalized direction vectors
+- **Tilt Control** — Device orientation API maps phone tilt (beta/gamma) to velocity changes with 15° threshold
+- **iOS Permission Handling** — Properly requests DeviceOrientation permission on iOS 13+ devices
+- **Touch Controls** — Swipe gestures and D-pad buttons for mobile devices
+
+### Technical
+- **Ref-based Game Loop** — Uses refs for carrots/score/velocity to avoid stale closures
 - **Efficient Rendering** — Uses stable keys for rabbit segments, minimal re-renders
-- **Self-collision Optimization** — Excludes tail from collision check (since it moves away)
 - **localStorage Persistence** — High score survives page refreshes
 - **Pure CSS Graphics** — Rabbit and carrots drawn with CSS (no images needed)
 - **Radial Gradient Background** — Beautiful circular gradient for the game board
+- **Responsive Design** — Game board scales to `min(90vw, 90vh, 600px)` for optimal viewing
 
 ## 🎨 Visual Design
 
 - **Circular Board**: Round game board with emerald green border and radial gradient background
+- **Clean Background**: Dark green garden theme without grid lines for smooth visual experience
 - **Rabbit**: Cute white/cream character with pink ears, black eyes, and pink nose
 - **Carrots**: Multiple orange triangular carrots with green leaves, each with staggered pulse animations
-- **Background**: Dark green garden theme with subtle circular grid patterns
+- **Smooth Movement**: Physics-based interpolation creates fluid, organic motion
 - **Animations**: Smooth pulsing carrots with staggered delays, gradient effects, glass-morphism overlays
 - **Boundary Indicator**: Subtle inner ring showing the circular play area
 

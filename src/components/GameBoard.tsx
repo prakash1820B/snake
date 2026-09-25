@@ -12,7 +12,7 @@ export default function GameBoard({ rabbit, carrots, gridSize, gameState, score 
   const cellSize = 100 / gridSize;
 
   return (
-    <div className="relative w-full aspect-square max-w-[500px] mx-auto">
+    <div className="relative w-full aspect-square">
       {/* Circular game board */}
       <div
         className="absolute inset-0 rounded-full border-4 border-emerald-700/60 overflow-hidden"
@@ -21,30 +21,6 @@ export default function GameBoard({ rabbit, carrots, gridSize, gameState, score 
           boxShadow: '0 0 30px rgba(16, 185, 129, 0.2), inset 0 0 60px rgba(0, 0, 0, 0.3)',
         }}
       >
-        {/* Grid pattern */}
-        <svg className="absolute inset-0 w-full h-full opacity-[0.06]" aria-hidden="true">
-          {Array.from({ length: gridSize - 1 }).map((_, i) => (
-            <g key={i}>
-              <line
-                x1={`${((i + 1) / gridSize) * 100}%`}
-                y1="0"
-                x2={`${((i + 1) / gridSize) * 100}%`}
-                y2="100%"
-                stroke="#86efac"
-                strokeWidth="0.5"
-              />
-              <line
-                x1="0"
-                y1={`${((i + 1) / gridSize) * 100}%`}
-                x2="100%"
-                y2={`${((i + 1) / gridSize) * 100}%`}
-                stroke="#86efac"
-                strokeWidth="0.5"
-              />
-            </g>
-          ))}
-        </svg>
-
         {/* Circular boundary indicator */}
         <div
           className="absolute inset-[2%] rounded-full border-2 border-emerald-600/20"
@@ -120,7 +96,7 @@ export default function GameBoard({ rabbit, carrots, gridSize, gameState, score 
 
           return (
             <div
-              key={`${segment.x}-${segment.y}-${index}`}
+              key={`${index}`}
               className="absolute"
               style={{
                 left: `${segment.x * cellSize}%`,
@@ -129,6 +105,7 @@ export default function GameBoard({ rabbit, carrots, gridSize, gameState, score 
                 height: `${cellSize}%`,
                 opacity,
                 zIndex: isHead ? 10 : 1,
+                transition: 'left 0.05s linear, top 0.05s linear',
               }}
             >
               {isHead ? (

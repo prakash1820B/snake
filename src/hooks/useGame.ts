@@ -10,9 +10,9 @@ const CENTER = GRID_SIZE / 2;
 const RADIUS = GRID_SIZE / 2;
 
 const SPEED_MAP: Record<Difficulty, number> = {
-  easy: 180,
-  medium: 120,
-  hard: 70,
+  easy: 0.08,
+  medium: 0.12,
+  hard: 0.18,
 };
 
 const POINTS_MAP: Record<Difficulty, number> = {
@@ -22,45 +22,46 @@ const POINTS_MAP: Record<Difficulty, number> = {
 };
 
 function isInCircle(pos: Position): boolean {
-  const dx = pos.x - CENTER + 0.5;
-  const dy = pos.y - CENTER + 0.5;
+  const dx = pos.x - CENTER;
+  const dy = pos.y - CENTER;
   const distance = Math.sqrt(dx * dx + dy * dy);
   return distance <= RADIUS;
 }
 
 function wrapThroughCircle(pos: Position): Position {
-  const reflected = {
-    x: 2 * (CENTER - 0.5) - pos.x,
-    y: 2 * (CENTER - 0.5) - pos.y,
-  };
-
-  if (!isInCircle(reflected)) {
-    const dx = reflected.x - CENTER + 0.5;
-    const dy = reflected.y - CENTER + 0.5;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    if (distance > 0) {
-      const scale = (RADIUS - 1) / distance;
-      return {
-        x: Math.round(CENTER - 0.5 + dx * scale),
-        y: Math.round(CENTER - 0.5 + dy * scale),
-      };
-    }
+  const dx = pos.x - CENTER;
+  const dy = pos.y - CENTER;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  
+  if (distance > RADIUS) {
+    const angle = Math.atan2(dy, dx);
+    const wrappedDistance = distance - RADIUS * 2;
+    return {
+      x: CENTER + Math.cos(angle + Math.PI) * Math.abs(wrappedDistance),
+      y: CENTER + Math.sin(angle + Math.PI) * Math.abs(wrappedDistance),
+    };
   }
-
-  return reflected;
+  
+  return pos;
 }
 
-function getRandomPositionInCircle(exclude: Position[]): Position {
+function getRandomPositionInCircle(exclude: Position[], minDistance: number = 1): Position {
   let pos: Position;
   let attempts = 0;
   do {
+    const angle = Math.random() * Math.PI * 2;
+    const radius = Math.random() * (RADIUS - 1);
     pos = {
-      x: Math.floor(Math.random() * GRID_SIZE),
-      y: Math.floor(Math.random() * GRID_SIZE),
+      x: CENTER + Math.cos(angle) * radius,
+      y: CENTER + Math.sin(angle) * radius,
     };
     attempts++;
     if (attempts > 1000) break;
-  } while (!isInCircle(pos) || exclude.some(s => s.x === pos.x && s.y === pos.y));
+  } while (!isInCircle(pos) || exclude.some(s => {
+    const dx = s.x - pos.x;
+    const dy = s.y - pos.y;
+    return Math.sqrt(dx * dx + dy * dy) < minDistance;
+  }));
   return pos;
 }
 
@@ -68,7 +69,7 @@ function generateCarrots(rabbit: Position[], count: number): Position[] {
   const carrots: Position[] = [];
   for (let i = 0; i < count; i++) {
     const exclude = [...rabbit, ...carrots];
-    carrots.push(getRandomPositionInCircle(exclude));
+    carrots.push(getRandomPositionInCircle(exclude, 1.5));
   }
   return carrots;
 }
@@ -79,12 +80,10 @@ const INITIAL_RABBIT: Position[] = [
   { x: 8, y: 10 },
 ];
 
-const OPPOSITES: Record<Direction, Direction> = {
-  UP: 'DOWN',
-  DOWN: 'UP',
-  LEFT: 'RIGHT',
-  RIGHT: 'LEFT',
-};
+interface Velocity {
+  x: number;
+  y: number;
+}
 
 export function useGame() {
   const [rabbit, setRabbit] = useState<Position[]>(INITIAL_RABBIT);
@@ -101,12 +100,12 @@ export function useGame() {
     }
   });
 
-  const directionRef = useRef<Direction>('RIGHT');
+  const velocityRef = useRef<Velocity>({ x: 0.12, y: 0 });
+  const targetVelocityRef = useRef<Velocity>({ x: 0.12, y: 0 });
   const carrotsRef = useRef<Position[]>(carrots);
   const scoreRef = useRef(0);
   const difficultyRef = useRef<Difficulty>('medium');
   const gameStateRef = useRef<GameState>('idle');
-  const directionQueueRef = useRef<Direction[]>([]);
 
   useEffect(() => { carrotsRef.current = carrots; }, [carrots]);
   useEffect(() => { scoreRef.current = score; }, [score]);
@@ -135,8 +134,8 @@ export function useGame() {
     const newCarrots = generateCarrots(initialRabbit, count);
     setCarrots(newCarrots);
     carrotsRef.current = newCarrots;
-    directionRef.current = 'RIGHT';
-    directionQueueRef.current = [];
+    velocityRef.current = { x: 0.12, y: 0 };
+    targetVelocityRef.current = { x: 0.12, y: 0 };
     setScore(0);
     scoreRef.current = 0;
     setGameState('idle');
@@ -150,8 +149,8 @@ export function useGame() {
       const newCarrots = generateCarrots(initialRabbit, count);
       setCarrots(newCarrots);
       carrotsRef.current = newCarrots;
-      directionRef.current = 'RIGHT';
-      directionQueueRef.current = [];
+      velocityRef.current = { x: 0.12, y: 0 };
+      targetVelocityRef.current = { x: 0.12, y: 0 };
       setScore(0);
       scoreRef.current = 0;
     }
@@ -167,15 +166,20 @@ export function useGame() {
   }, []);
 
   const changeDirection = useCallback((newDir: Direction) => {
-    const lastQueued = directionQueueRef.current.length > 0
-      ? directionQueueRef.current[directionQueueRef.current.length - 1]
-      : directionRef.current;
-
-    if (OPPOSITES[newDir] !== lastQueued && newDir !== lastQueued) {
-      directionQueueRef.current.push(newDir);
-      if (directionQueueRef.current.length > 2) {
-        directionQueueRef.current = directionQueueRef.current.slice(-2);
-      }
+    const speed = SPEED_MAP[difficultyRef.current];
+    switch (newDir) {
+      case 'UP':
+        targetVelocityRef.current = { x: 0, y: -speed };
+        break;
+      case 'DOWN':
+        targetVelocityRef.current = { x: 0, y: speed };
+        break;
+      case 'LEFT':
+        targetVelocityRef.current = { x: -speed, y: 0 };
+        break;
+      case 'RIGHT':
+        targetVelocityRef.current = { x: speed, y: 0 };
+        break;
     }
   }, []);
 
@@ -184,53 +188,57 @@ export function useGame() {
 
     const dx = targetX - CENTER;
     const dy = targetY - CENTER;
-
-    let newDir: Direction;
-    if (Math.abs(dx) > Math.abs(dy)) {
-      newDir = dx > 0 ? 'RIGHT' : 'LEFT';
-    } else {
-      newDir = dy > 0 ? 'DOWN' : 'UP';
-    }
-
-    const lastQueued = directionQueueRef.current.length > 0
-      ? directionQueueRef.current[directionQueueRef.current.length - 1]
-      : directionRef.current;
-
-    if (OPPOSITES[newDir] !== lastQueued && newDir !== lastQueued) {
-      directionQueueRef.current = [newDir];
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    if (distance > 0.5) {
+      const speed = SPEED_MAP[difficultyRef.current];
+      const normalizedX = dx / distance;
+      const normalizedY = dy / distance;
+      targetVelocityRef.current = {
+        x: normalizedX * speed,
+        y: normalizedY * speed,
+      };
     }
   }, []);
 
   useEffect(() => {
     if (gameState !== 'playing') return;
 
-    const tick = () => {
-      if (directionQueueRef.current.length > 0) {
-        const nextDir = directionQueueRef.current.shift()!;
-        if (OPPOSITES[nextDir] !== directionRef.current) {
-          directionRef.current = nextDir;
-        }
-      }
+    let animationFrameId: number;
+    let lastTime = performance.now();
+
+    const tick = (currentTime: number) => {
+      const deltaTime = (currentTime - lastTime) / 16; // normalize to 60fps
+      lastTime = currentTime;
+
+      // Smooth velocity interpolation
+      const lerpFactor = 0.15 * deltaTime;
+      velocityRef.current = {
+        x: velocityRef.current.x + (targetVelocityRef.current.x - velocityRef.current.x) * lerpFactor,
+        y: velocityRef.current.y + (targetVelocityRef.current.y - velocityRef.current.y) * lerpFactor,
+      };
 
       setRabbit(prevRabbit => {
         const head = { ...prevRabbit[0] };
-        const dir = directionRef.current;
+        
+        // Apply velocity
+        head.x += velocityRef.current.x * deltaTime;
+        head.y += velocityRef.current.y * deltaTime;
 
-        switch (dir) {
-          case 'UP': head.y -= 1; break;
-          case 'DOWN': head.y += 1; break;
-          case 'LEFT': head.x -= 1; break;
-          case 'RIGHT': head.x += 1; break;
-        }
-
+        // Wrap through circle
         if (!isInCircle(head)) {
           const wrapped = wrapThroughCircle(head);
           head.x = wrapped.x;
           head.y = wrapped.y;
         }
 
+        // Self collision
         const bodyToCheck = prevRabbit.slice(0, -1);
-        if (bodyToCheck.some(s => s.x === head.x && s.y === head.y)) {
+        if (bodyToCheck.some(s => {
+          const dx = s.x - head.x;
+          const dy = s.y - head.y;
+          return Math.sqrt(dx * dx + dy * dy) < 0.5;
+        })) {
           endGame();
           return prevRabbit;
         }
@@ -238,11 +246,16 @@ export function useGame() {
         const newRabbit = [head, ...prevRabbit];
         const currentCarrots = carrotsRef.current;
 
-        const eatenIndex = currentCarrots.findIndex(c => c.x === head.x && c.y === head.y);
+        // Check carrot collision
+        const eatenIndex = currentCarrots.findIndex(c => {
+          const dx = c.x - head.x;
+          const dy = c.y - head.y;
+          return Math.sqrt(dx * dx + dy * dy) < 0.8;
+        });
 
         if (eatenIndex !== -1) {
           const newCarrots = currentCarrots.filter((_, i) => i !== eatenIndex);
-          const newCarrot = getRandomPositionInCircle([...newRabbit, ...newCarrots]);
+          const newCarrot = getRandomPositionInCircle([...newRabbit, ...newCarrots], 1.5);
           newCarrots.push(newCarrot);
 
           setCarrots(newCarrots);
@@ -261,11 +274,13 @@ export function useGame() {
         newRabbit.pop();
         return newRabbit;
       });
+
+      animationFrameId = requestAnimationFrame(tick);
     };
 
-    const interval = setInterval(tick, SPEED_MAP[difficulty]);
-    return () => clearInterval(interval);
-  }, [gameState, difficulty, endGame]);
+    animationFrameId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [gameState, endGame]);
 
   return {
     rabbit,
